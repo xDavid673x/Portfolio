@@ -1,0 +1,156 @@
+.shell {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  height: 100%;
+  min-height: clamp(28rem, 58vw, 47rem);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 67% 33%, rgb(184 255 79 / 10%), transparent 28%),
+    radial-gradient(circle at 28% 64%, rgb(119 217 196 / 8%), transparent 34%),
+    linear-gradient(145deg, #080b0d 0%, #050708 58%, #090d0e 100%);
+  contain: layout paint style;
+}
+
+.shell::before {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  opacity: 0.17;
+  background-image:
+    repeating-linear-gradient(
+      115deg,
+      transparent 0,
+      transparent 2px,
+      rgb(255 255 255 / 4%) 2px,
+      rgb(255 255 255 / 4%) 3px
+    );
+  mix-blend-mode: soft-light;
+}
+
+.canvas {
+  position: absolute !important;
+  z-index: 1;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  touch-action: pan-y;
+}
+
+.fallbackShell {
+  display: grid;
+  place-items: center;
+}
+
+.fallbackGrid {
+  position: absolute;
+  z-index: 0;
+  left: -8%;
+  right: -8%;
+  bottom: -28%;
+  height: 73%;
+  opacity: 0.29;
+  background-image:
+    linear-gradient(rgb(139 171 164 / 19%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(139 171 164 / 19%) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to top, #000 14%, transparent 88%);
+  transform: perspective(460px) rotateX(63deg) scale(1.38);
+  transform-origin: bottom;
+}
+
+.fallbackGraphic {
+  position: absolute;
+  z-index: 1;
+  inset: 2% 0 0;
+  width: 100%;
+  height: 96%;
+  filter: drop-shadow(0 24px 42px rgb(0 0 0 / 48%));
+}
+
+.fallbackRouteGlow,
+.fallbackRoute {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fallbackRouteGlow {
+  stroke: rgb(184 255 79 / 14%);
+  stroke-width: 11;
+}
+
+.fallbackRoute {
+  stroke: #b8ff4f;
+  stroke-width: 2;
+  opacity: 0.7;
+}
+
+.fallbackWaypoint {
+  fill: rgb(5 8 9 / 80%);
+  stroke: #77d9c4;
+  stroke-width: 2;
+  opacity: 0.72;
+}
+
+.fallbackWaypointCore {
+  fill: #f1ffe2;
+}
+
+.fallbackArmLinks path,
+.fallbackArmCore path,
+.fallbackArmAccent path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fallbackArmLinks path {
+  stroke: #0b0e0f;
+  stroke-width: 61;
+}
+
+.fallbackArmCore path {
+  stroke: url("#fallback-metal");
+  stroke-width: 48;
+}
+
+.fallbackArmAccent path {
+  stroke: #b8ff4f;
+  stroke-width: 7;
+}
+
+.fallbackVignette {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgb(5 7 8 / 34%) 0%, transparent 27%, transparent 78%, rgb(5 7 8 / 38%) 100%),
+    linear-gradient(0deg, rgb(5 7 8 / 76%) 0%, transparent 22%, transparent 79%, rgb(5 7 8 / 18%) 100%);
+}
+
+@media (width <= 700px) {
+  .shell {
+    min-height: 31rem;
+  }
+
+  .fallbackGraphic {
+    width: 122%;
+    max-width: none;
+    translate: -7% 2%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell *,
+  .shell *::before,
+  .shell *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

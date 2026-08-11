@@ -1,0 +1,921 @@
+.visual {
+  --line: rgba(255, 255, 255, 0.14);
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: clamp(1rem, 2vw, 1.75rem);
+  isolation: isolate;
+  font-family: var(--font-geist-mono), "SFMono-Regular", Consolas, monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 32px 80px rgba(0, 0, 0, 0.25);
+}
+
+.visual::after {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
+  content: "";
+  opacity: 0.055;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+}
+
+.technicalHeader {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 12%;
+  min-height: 2.25rem;
+  padding-inline: clamp(0.75rem, 2vw, 1.35rem);
+  border-bottom: 1px solid var(--line);
+  color: rgba(255, 255, 255, 0.62);
+  font-size: clamp(0.48rem, 0.72vw, 0.65rem);
+}
+
+.headerState {
+  display: inline-flex;
+  gap: 0.45rem;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.headerState i {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0.75rem currentColor;
+  animation: statusPulse 2.8s ease-in-out infinite;
+}
+
+.robotVisual {
+  --accent: #c9ff4a;
+  --accent-rgb: 201, 255, 74;
+  background:
+    radial-gradient(circle at 20% 12%, rgba(130, 169, 49, 0.17), transparent 33%),
+    radial-gradient(circle at 80% 115%, rgba(201, 255, 74, 0.07), transparent 40%),
+    #0b0d0a;
+}
+
+.robotLayout,
+.autonomyLayout {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(10rem, 0.82fr);
+  height: 88%;
+}
+
+.robotStage,
+.trackViewport {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border-right: 1px solid var(--line);
+}
+
+.robotStage::before,
+.trackViewport::before {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(112deg, rgba(255, 255, 255, 0.025), transparent 45%);
+  content: "";
+}
+
+.robotSvg,
+.trackSvg {
+  width: 100%;
+  height: calc(100% - 1.85rem);
+  color: var(--accent);
+}
+
+.robotGrid,
+.trackGrid {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 0.75;
+  vector-effect: non-scaling-stroke;
+}
+
+.axisLabels {
+  position: absolute;
+  inset: 0.75rem auto auto 0.8rem;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: rgba(255, 255, 255, 0.34);
+  font-size: 0.5rem;
+}
+
+.trajectoryGhost,
+.trajectory {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.trajectoryGhost {
+  stroke: rgba(var(--accent-rgb), 0.14);
+  stroke-width: 9;
+}
+
+.trajectory {
+  stroke: var(--accent);
+  stroke-width: 1.6;
+  stroke-dasharray: 5 6;
+  animation: pathTravel 7s linear infinite;
+}
+
+.goal {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.25;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: targetBreathe 3.5s ease-in-out infinite;
+}
+
+.goal circle:first-child {
+  fill: rgba(var(--accent-rgb), 0.04);
+  stroke-dasharray: 3 4;
+}
+
+.goal circle:nth-child(2) {
+  fill: var(--accent);
+  stroke: none;
+}
+
+.armBase,
+.armUpper,
+.armForearm {
+  fill: #171c13;
+  stroke: rgba(245, 255, 225, 0.88);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 8;
+}
+
+.armBase path,
+.armBase rect {
+  stroke-width: 1.5;
+}
+
+.armBase circle,
+.armUpper circle,
+.armForearm circle {
+  fill: #10130e;
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.armUpper path,
+.armForearm path {
+  fill: none;
+}
+
+.armForearm {
+  transform-box: fill-box;
+  transform-origin: 8% 68%;
+  animation: armCalibrate 6s ease-in-out infinite;
+}
+
+.samplePoses {
+  fill: var(--accent);
+}
+
+.samplePoses circle {
+  filter: drop-shadow(0 0 5px var(--accent));
+}
+
+.stageLegend,
+.trackLegend {
+  position: absolute;
+  right: 0.85rem;
+  bottom: 0.75rem;
+  left: 0.85rem;
+  display: flex;
+  gap: clamp(0.65rem, 2vw, 1.25rem);
+  align-items: center;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: clamp(0.42rem, 0.6vw, 0.55rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.stageLegend span,
+.trackLegend span {
+  display: inline-flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.stageLegend i,
+.trackLegend i {
+  display: inline-block;
+  flex: 0 0 auto;
+}
+
+.legendGoal {
+  width: 0.45rem;
+  height: 0.45rem;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+}
+
+.legendPath,
+.pathKey {
+  width: 1.15rem;
+  border-top: 1px dashed var(--accent);
+}
+
+.rewardPanel,
+.telemetryPanel {
+  display: flex;
+  min-width: 0;
+  padding: clamp(0.7rem, 2vw, 1.15rem);
+  flex-direction: column;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.panelTitleRow,
+.telemetryTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: clamp(0.5rem, 1vw, 0.85rem);
+  color: rgba(255, 255, 255, 0.38);
+  font-size: clamp(0.38rem, 0.58vw, 0.52rem);
+}
+
+.panelTitleRow span:first-child,
+.telemetryTitle span:first-child {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.rewardChart {
+  width: 100%;
+  height: 26%;
+  min-height: 3.25rem;
+  overflow: visible;
+}
+
+.chartGrid {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 0.75;
+  vector-effect: non-scaling-stroke;
+}
+
+.rewardArea {
+  fill: rgba(var(--accent-rgb), 0.08);
+}
+
+.rewardLine {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.6;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 4px rgba(var(--accent-rgb), 0.42));
+}
+
+.signalFlow {
+  display: grid;
+  grid-template-columns: auto minmax(0.4rem, 1fr) auto minmax(0.4rem, 1fr) auto;
+  gap: 0.35rem;
+  align-items: center;
+  margin-block: auto;
+  color: rgba(255, 255, 255, 0.52);
+  font-size: clamp(0.32rem, 0.51vw, 0.46rem);
+  text-align: center;
+}
+
+.signalFlow i {
+  position: relative;
+  height: 1px;
+  overflow: hidden;
+  background: rgba(var(--accent-rgb), 0.18);
+}
+
+.signalFlow i::after {
+  position: absolute;
+  width: 45%;
+  height: 100%;
+  background: var(--accent);
+  content: "";
+  animation: signalMove 2.6s ease-in-out infinite;
+}
+
+.policyGrid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: clamp(0.35rem, 0.9vw, 0.65rem) 0.7rem;
+  padding-top: clamp(0.55rem, 1.3vw, 0.9rem);
+  border-top: 1px solid var(--line);
+  font-size: clamp(0.35rem, 0.54vw, 0.48rem);
+}
+
+.policyGrid span {
+  color: rgba(255, 255, 255, 0.34);
+}
+
+.policyGrid b {
+  color: var(--accent);
+  font-weight: 500;
+  text-align: right;
+}
+
+.autonomyVisual {
+  --accent: #ff5b35;
+  --accent-rgb: 255, 91, 53;
+  background:
+    radial-gradient(circle at 14% 85%, rgba(0, 170, 255, 0.12), transparent 36%),
+    radial-gradient(circle at 82% 6%, rgba(255, 91, 53, 0.14), transparent 32%),
+    #090b0d;
+}
+
+.viewportLabel {
+  position: absolute;
+  top: 0.85rem;
+  left: 0.85rem;
+  z-index: 2;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: clamp(0.4rem, 0.6vw, 0.53rem);
+}
+
+.trackGrid {
+  stroke: rgba(73, 174, 255, 0.09);
+}
+
+.trackEdge {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+
+.safeCorridor {
+  fill: none;
+  stroke: rgba(var(--accent-rgb), 0.13);
+  stroke-linecap: round;
+  stroke-width: 24;
+}
+
+.plannedPath {
+  fill: none;
+  stroke: var(--accent);
+  stroke-linecap: round;
+  stroke-width: 2;
+  stroke-dasharray: 7 6;
+  animation: pathTravel 6s linear infinite;
+}
+
+.perceptionCone {
+  fill: rgba(63, 164, 255, 0.07);
+  stroke: rgba(63, 164, 255, 0.24);
+  stroke-width: 0.8;
+}
+
+.perceptionRay {
+  fill: none;
+  stroke: rgba(63, 164, 255, 0.18);
+  stroke-width: 0.7;
+}
+
+.boundaryPoints {
+  fill: #3ba6ff;
+  stroke: #0b1117;
+  stroke-width: 1.5;
+}
+
+.boundaryPoints > g:nth-child(even) > circle:first-child,
+.boundaryPoints > circle:nth-last-child(-n + 3) {
+  fill: var(--accent);
+}
+
+.pointEcho {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 0.8;
+  animation: pointPing 3s ease-out infinite;
+}
+
+.carMarker {
+  fill: #e9eef1;
+  stroke: #111518;
+  stroke-width: 1.4;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.22));
+}
+
+.boundaryKey {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: #3ba6ff;
+  box-shadow: 0 0 0 2px rgba(59, 166, 255, 0.14);
+}
+
+.pipelineBands {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.pipelineBand {
+  display: grid;
+  grid-template-columns: minmax(4.2rem, 0.85fr) 1.3fr;
+  gap: 0.7rem;
+  align-items: center;
+  padding-block: clamp(0.5rem, 1.2vw, 0.8rem);
+  border-top: 1px solid var(--line);
+}
+
+.pipelineBand:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.pipelineBand > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.pipelineBand span {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: clamp(0.36rem, 0.56vw, 0.5rem);
+}
+
+.pipelineBand small {
+  color: rgba(255, 255, 255, 0.28);
+  font-size: clamp(0.3rem, 0.47vw, 0.42rem);
+}
+
+.bandSignal {
+  display: flex;
+  gap: 0.2rem;
+  align-items: end;
+  height: 1.35rem;
+}
+
+.bandSignal i {
+  flex: 1;
+  height: 32%;
+  background: rgba(var(--accent-rgb), 0.24);
+  transform-origin: bottom;
+  animation: bandPulse 3.2s ease-in-out infinite;
+}
+
+.bandSignal i:nth-child(2) {
+  height: 74%;
+  animation-delay: -2.4s;
+}
+
+.bandSignal i:nth-child(3) {
+  height: 48%;
+  animation-delay: -1.6s;
+}
+
+.bandSignal i:nth-child(4) {
+  height: 92%;
+  animation-delay: -0.8s;
+}
+
+.bandSignal i:nth-child(5) {
+  height: 61%;
+}
+
+.steeringMap {
+  padding-top: clamp(0.55rem, 1.2vw, 0.8rem);
+}
+
+.steeringMap > span {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: clamp(0.34rem, 0.5vw, 0.45rem);
+}
+
+.steeringMap svg {
+  width: 100%;
+  height: clamp(1.75rem, 4.8vw, 3.25rem);
+  overflow: visible;
+}
+
+.steeringLine {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.fitnessVisual {
+  aspect-ratio: 16 / 10;
+  padding: clamp(0.65rem, 1.8vw, 1.25rem);
+  border-color: rgba(34, 55, 42, 0.2);
+  background:
+    radial-gradient(circle at 75% 16%, rgba(177, 213, 164, 0.75), transparent 35%),
+    linear-gradient(145deg, #d8e0d2 0%, #aebead 48%, #738b78 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 32px 80px rgba(26, 45, 31, 0.25);
+}
+
+.fitnessBrowser {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  grid-template-rows: clamp(2rem, 7%, 2.8rem) 1fr;
+  border: 1px solid rgba(17, 34, 22, 0.16);
+  border-radius: clamp(0.65rem, 1.3vw, 1.05rem);
+  background: #f1f0e8;
+  color: #132019;
+  box-shadow: 0 18px 45px rgba(23, 49, 29, 0.2);
+}
+
+.browserBar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding-inline: clamp(0.6rem, 1.4vw, 1rem);
+  border-bottom: 1px solid rgba(17, 34, 22, 0.12);
+  background: rgba(248, 248, 241, 0.92);
+  font-size: clamp(0.38rem, 0.56vw, 0.5rem);
+}
+
+.browserDots {
+  display: flex;
+  gap: 0.24rem;
+}
+
+.browserDots i {
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 50%;
+  background: rgba(19, 32, 25, 0.18);
+}
+
+.browserAddress {
+  color: rgba(19, 32, 25, 0.56);
+}
+
+.browserMenu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  align-items: flex-end;
+}
+
+.browserMenu i {
+  width: 1.05rem;
+  height: 1px;
+  background: rgba(19, 32, 25, 0.55);
+}
+
+.fitnessMosaic {
+  display: grid;
+  min-height: 0;
+  grid-template-columns: 1.45fr 0.55fr 0.92fr;
+  grid-template-rows: 1fr 0.56fr;
+  grid-auto-flow: dense;
+}
+
+.fitnessHeroTile {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  grid-row: span 2;
+  border-right: 1px solid rgba(17, 34, 22, 0.14);
+  color: #f4f2e9;
+}
+
+.fitnessPhoto,
+.fitnessPhotoWash {
+  position: absolute;
+  inset: 0;
+}
+
+.fitnessPhoto {
+  background:
+    linear-gradient(rgba(17, 28, 21, 0.08), rgba(17, 28, 21, 0.08)),
+    url("/images/gym-platform.webp") center / cover no-repeat,
+    #39493d;
+  filter: saturate(0.58) contrast(1.08);
+  transform: scale(1.02);
+  animation: imageBreathe 9s ease-in-out infinite alternate;
+}
+
+.fitnessPhotoWash {
+  background:
+    linear-gradient(90deg, rgba(13, 23, 16, 0.76), rgba(13, 23, 16, 0.05) 76%),
+    linear-gradient(0deg, rgba(13, 23, 16, 0.38), transparent 54%);
+}
+
+.fitnessHeroCopy {
+  position: absolute;
+  inset: auto clamp(0.7rem, 2vw, 1.35rem) clamp(0.9rem, 2.5vw, 1.7rem);
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.fitnessHeroCopy span,
+.tileHeading span,
+.membershipTile > span,
+.accountTile span {
+  font-size: clamp(0.38rem, 0.58vw, 0.52rem);
+  letter-spacing: 0.13em;
+}
+
+.fitnessHeroCopy strong {
+  max-width: 11ch;
+  margin-block: clamp(0.35rem, 0.8vw, 0.65rem);
+  font-family: var(--font-geist-sans), Arial, sans-serif;
+  font-size: clamp(1rem, 2.5vw, 2rem);
+  font-weight: 560;
+  letter-spacing: -0.055em;
+  line-height: 0.95;
+}
+
+.fitnessHeroCopy > i {
+  padding-bottom: 0.18rem;
+  border-bottom: 1px solid currentColor;
+  font-family: var(--font-geist-sans), Arial, sans-serif;
+  font-size: clamp(0.45rem, 0.7vw, 0.62rem);
+  font-style: normal;
+  letter-spacing: 0.01em;
+}
+
+.scheduleTile {
+  display: flex;
+  min-width: 0;
+  padding: clamp(0.55rem, 1.25vw, 0.95rem);
+  grid-column: span 2;
+  flex-direction: column;
+  border-bottom: 1px solid rgba(17, 34, 22, 0.14);
+  background: #eeeee6;
+}
+
+.tileHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: clamp(0.35rem, 0.8vw, 0.6rem);
+  border-bottom: 1px solid rgba(17, 34, 22, 0.15);
+  color: rgba(19, 32, 25, 0.6);
+}
+
+.tileHeading > i {
+  width: 0.42rem;
+  height: 0.42rem;
+  border: 1px solid #132019;
+  border-radius: 50%;
+}
+
+.scheduleRows {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+
+.scheduleRows > div {
+  display: grid;
+  grid-template-columns: minmax(3.6rem, 1.2fr) 1fr auto;
+  gap: 0.45rem;
+  align-items: center;
+  color: rgba(19, 32, 25, 0.55);
+  font-family: var(--font-geist-sans), Arial, sans-serif;
+  font-size: clamp(0.44rem, 0.68vw, 0.6rem);
+}
+
+.scheduleRows b {
+  color: #132019;
+  font-weight: 580;
+}
+
+.scheduleRows i,
+.accountArrow {
+  display: block;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-top: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+  transform: rotate(45deg);
+}
+
+.membershipTile {
+  display: flex;
+  min-width: 0;
+  padding: clamp(0.55rem, 1.25vw, 0.95rem);
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid rgba(17, 34, 22, 0.14);
+  background: #c9d9c5;
+}
+
+.membershipTile > span {
+  color: rgba(19, 32, 25, 0.55);
+}
+
+.membershipTile strong {
+  font-family: var(--font-geist-sans), Arial, sans-serif;
+  font-size: clamp(0.65rem, 1.25vw, 1rem);
+  font-weight: 550;
+  letter-spacing: -0.035em;
+  line-height: 1.03;
+}
+
+.membershipLines {
+  display: flex;
+  gap: 0.18rem;
+}
+
+.membershipLines i {
+  width: 1rem;
+  height: 0.18rem;
+  background: #132019;
+}
+
+.membershipLines i:nth-child(2) {
+  opacity: 0.4;
+}
+
+.membershipLines i:nth-child(3) {
+  opacity: 0.18;
+}
+
+.accountTile {
+  display: grid;
+  min-width: 0;
+  padding: clamp(0.55rem, 1.25vw, 0.95rem);
+  grid-template-columns: auto 1fr auto;
+  gap: clamp(0.45rem, 1vw, 0.8rem);
+  align-items: center;
+  background: #183325;
+  color: #e9eee5;
+}
+
+.accountMark {
+  display: grid;
+  width: clamp(1.55rem, 3vw, 2.3rem);
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid rgba(233, 238, 229, 0.35);
+  border-radius: 50%;
+  font-family: var(--font-geist-sans), Arial, sans-serif;
+  font-size: clamp(0.7rem, 1.3vw, 1rem);
+}
+
+.accountTile > div:nth-child(2) {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.accountTile span {
+  color: rgba(233, 238, 229, 0.48);
+}
+
+.accountTile strong {
+  overflow: hidden;
+  font-family: var(--font-geist-sans), Arial, sans-serif;
+  font-size: clamp(0.5rem, 0.8vw, 0.7rem);
+  font-weight: 520;
+  letter-spacing: -0.015em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.accountArrow {
+  color: rgba(233, 238, 229, 0.72);
+}
+
+@keyframes pathTravel {
+  to { stroke-dashoffset: -44; }
+}
+
+@keyframes targetBreathe {
+  50% { opacity: 0.55; transform: scale(1.08); }
+}
+
+@keyframes armCalibrate {
+  0%, 100% { transform: rotate(-1.5deg); }
+  50% { transform: rotate(2.5deg); }
+}
+
+@keyframes statusPulse {
+  50% { opacity: 0.45; transform: scale(0.78); }
+}
+
+@keyframes signalMove {
+  from { transform: translateX(-110%); }
+  to { transform: translateX(250%); }
+}
+
+@keyframes pointPing {
+  0% { opacity: 0.85; transform: scale(0.45); }
+  70%, 100% { opacity: 0; transform: scale(1.35); }
+}
+
+@keyframes bandPulse {
+  0%, 100% { opacity: 0.35; transform: scaleY(0.6); }
+  50% { opacity: 1; transform: scaleY(1); }
+}
+
+@keyframes imageBreathe {
+  from { transform: scale(1.02); }
+  to { transform: scale(1.08); }
+}
+
+@container (max-width: 530px) {
+  .visual {
+    aspect-ratio: 4 / 3;
+  }
+
+  .robotLayout,
+  .autonomyLayout {
+    grid-template-columns: minmax(0, 1.4fr) minmax(7.25rem, 0.7fr);
+  }
+
+  .panelTitleRow span:last-child,
+  .telemetryTitle span:last-child,
+  .policyGrid span,
+  .scheduleRows span,
+  .browserAddress {
+    display: none;
+  }
+
+  .policyGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .policyGrid b {
+    text-align: left;
+  }
+
+  .signalFlow {
+    grid-template-columns: 1fr;
+  }
+
+  .signalFlow i {
+    display: none;
+  }
+
+  .pipelineBand {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+  }
+
+  .pipelineBand small {
+    display: none;
+  }
+
+  .fitnessMosaic {
+    grid-template-columns: 1.3fr 0.7fr;
+    grid-template-rows: 1.35fr 0.65fr;
+  }
+
+  .fitnessHeroTile {
+    grid-row: span 2;
+  }
+
+  .scheduleTile {
+    grid-column: auto;
+  }
+
+  .membershipTile {
+    display: none;
+  }
+
+  .accountTile {
+    grid-template-columns: auto 1fr;
+  }
+
+  .accountArrow {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .visual *,
+  .visual *::before,
+  .visual *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
