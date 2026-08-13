@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Intelligent Systems Portfolio | Computer Science",
+  title: "Ka Chong | Intelligent Systems Portfolio",
   description:
     "A Computer Science portfolio spanning reinforcement-learning robotics, autonomous systems, and full-stack engineering.",
   keywords: [
@@ -35,8 +35,12 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body>{children}</body>
+      {/* Browser extensions can annotate document nodes before React hydrates. */}
+      <body suppressHydrationWarning>
+        {children}
+      </body>
     </html>
   );
 }

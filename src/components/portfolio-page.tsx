@@ -2,6 +2,7 @@
 
 import { useGSAP } from "@gsap/react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import type { CSSProperties } from "react";
 import { useRef, useState } from "react";
 import gsap from "gsap";
@@ -10,10 +11,10 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ProjectVisual as ProjectVisualPanel } from "@/components/project-visuals";
 import { projects } from "@/data/projects";
 
-const HeroScene = dynamic(
+const RoboticArmScene = dynamic(
   () =>
-    import("@/components/three/hero-scene").then(
-      (module) => module.HeroScene,
+    import("@/components/three/robotic-arm-scene").then(
+      (module) => module.RoboticArmScene,
     ),
   {
     ssr: false,
@@ -119,7 +120,7 @@ export function PortfolioPage() {
           intro
             .from(".site-nav", { y: -24, opacity: 0, duration: 0.7 })
             .from(
-              ".hero-context, .hero-title__line, .hero-summary, .hero-actions",
+              ".hero-context, .hero-title__line, .hero-intro, .hero-actions",
               {
                 y: 44,
                 opacity: 0,
@@ -205,90 +206,95 @@ export function PortfolioPage() {
     <main ref={root} className="portfolio-shell overflow-x-hidden w-full max-w-full">
       <section className="hero" id="top">
         <div className="hero-noise" aria-hidden="true" />
-        <nav className="site-nav" aria-label="Primary navigation">
-          <a className="brand-mark" href="#top" aria-label="Back to top">
-            <span>D</span>
-            <span className="brand-mark__slash">/</span>
-            <span>CS</span>
-          </a>
-          <div className="site-nav__links">
-            <a href="#work">Work</a>
-            <a href="#profile">Profile</a>
-            <a
-              href="https://github.com/xDavid673x"
-              target="_blank"
-              rel="noreferrer"
-            >
-              GitHub
+        <div className="hero-panel">
+          <nav className="site-nav" aria-label="Primary navigation">
+            <a className="brand-mark" href="#top" aria-label="Back to top">
+              <span>KA CHONG</span>
+              <span className="brand-mark__slash">/</span>
+              <span>CS</span>
             </a>
-          </div>
-          <a className="nav-cta" href="#contact">
-            Start a conversation
-            <ArrowIcon />
-          </a>
-        </nav>
-
-        <div className="hero-grid">
-          <div className="hero-copy">
-            <p className="hero-context">
-              Computer Science, Year 2
-              <span aria-hidden="true">/</span>
-              University of Manchester
-            </p>
-            <h1 className="hero-title w-full max-w-6xl">
-              <span className="hero-title__line">I build intelligent systems</span>{" "}
-              <span className="hero-title__line hero-title__line--accent">
-                that learn, move, and ship.
-              </span>
-            </h1>
-            <p className="hero-summary">
-              Moving from shipped full-stack software toward reinforcement-learning
-              robotics and autonomous Formula Student systems, with every project
-              grounded in visible evidence.
-            </p>
-            <div className="hero-actions">
-              <a className="button button--primary" href="#work">
-                Explore the work
-                <ArrowIcon />
-              </a>
+            <div className="site-nav__links">
+              <a href="#work">Work</a>
+              <a href="#profile">Profile</a>
               <a
-                className="button button--secondary"
                 href="https://github.com/xDavid673x"
                 target="_blank"
                 rel="noreferrer"
               >
-                View GitHub
+                GitHub
+              </a>
+            </div>
+            <a className="nav-cta" href="#contact">
+              Contact
+              <ArrowIcon />
+            </a>
+          </nav>
+
+          <div className="hero-grid">
+            <div className="hero-copy">
+              <p className="hero-context">
+                Computer Science
+                <span aria-hidden="true">/</span>
+                Manchester
+              </p>
+              <h1 className="hero-title" aria-label="Ka Chong">
+                <span className="hero-title__line">KA CHONG</span>
+              </h1>
+            </div>
+
+            <div className="hero-visual">
+              <div className="hero-portrait-glow" aria-hidden="true" />
+              <Image
+                alt="Stylized portrait of Ka Chong"
+                className="hero-portrait"
+                height={1402}
+                priority
+                sizes="(max-width: 620px) 96vw, (max-width: 899px) 74vw, 52vw"
+                src="/images/avatar/david-hero-portrait-v1.png"
+                width={1122}
+              />
+            </div>
+
+            <div className="hero-intro">
+              <span>Year 2 / University of Manchester</span>
+              <p className="hero-statement">
+                Building systems that <em>learn, move, and ship.</em>
+              </p>
+            </div>
+
+            <div className="hero-actions">
+              <a className="hero-talk" href="#contact">
+                <span>Let&apos;s talk</span>
+                <ArrowIcon />
+              </a>
+              <a
+                className="hero-github"
+                href="https://github.com/xDavid673x"
+                target="_blank"
+                rel="noreferrer"
+              >
+                GitHub
                 <ArrowIcon />
               </a>
             </div>
-          </div>
 
-          <div className="hero-visual" aria-label="Interactive robotic autonomy visualization">
-            <HeroScene
-              className="hero-scene"
-              style={{
-                position: "absolute",
-                inset: 0,
-                width: "100%",
-                height: "100%",
-                minHeight: 0,
-              }}
-            />
-            <div className="hero-visual__caption" aria-hidden="true">
-              <span>Policy trajectory</span>
-              <span>Pointer reactive</span>
-            </div>
-            <div className="hero-visual__index" aria-hidden="true">
-              <span>01</span>
-              <i />
-              <span>PHYSICAL AI</span>
+            <div className="hero-evidence">
+              <p>
+                From full-stack delivery to reinforcement-learning robotics and
+                autonomous Formula Student systems.
+              </p>
+              <dl>
+                <div>
+                  <dt>Building now</dt>
+                  <dd>RL robotic arm</dd>
+                </div>
+                <div>
+                  <dt>Moving toward</dt>
+                  <dd>Autonomous racing</dd>
+                </div>
+              </dl>
             </div>
           </div>
-        </div>
-
-        <div className="hero-footerline">
-          <span>Software that crosses the boundary into the physical world</span>
-          <a href="#work">Selected work</a>
         </div>
       </section>
 
@@ -361,6 +367,9 @@ export function PortfolioPage() {
             {projects.map((project, index) => (
               <article
                 className={`case-card case-card--${project.tone} case-card--layout-${index + 1}`}
+                data-arm-scroll-scene={
+                  project.id === "robotic-arm" ? "true" : undefined
+                }
                 id={`case-${project.id}`}
                 key={project.id}
                 style={{ "--card-index": index } as CSSProperties}
@@ -375,9 +384,22 @@ export function PortfolioPage() {
                 </header>
 
                 <div className="case-card__visual group overflow-hidden">
-                  <div className="group-hover:scale-105 transition-transform duration-700 ease-out">
-                    <ProjectVisualPanel type={project.visual} />
-                  </div>
+                  {project.id === "robotic-arm" ? (
+                    <div className="robotic-arm-scene-frame">
+                      <RoboticArmScene
+                        className="robotic-arm-project-scene"
+                        label="The articulated ZERO robotic arm performing a pick-and-place sorting task as the project chapter scrolls"
+                      />
+                      <div className="robotic-arm-scene-note" aria-hidden="true">
+                        <span>Pick → transfer → place</span>
+                        <span>Continuous workcell cycle</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="group-hover:scale-105 transition-transform duration-700 ease-out">
+                      <ProjectVisualPanel type={project.visual} />
+                    </div>
+                  )}
                 </div>
 
                 <dl className="case-card__details">
@@ -410,13 +432,13 @@ export function PortfolioPage() {
                         <span key={technology}>{technology}</span>
                       ))}
                     </div>
-                    {project.id === "fitness-platform" ? (
+                    {project.source ? (
                       <a
-                        href="https://github.com/xDavid673x"
+                        href={project.source.href}
                         target="_blank"
                         rel="noreferrer"
                       >
-                        Source profile
+                        {project.source.label}
                         <ArrowIcon />
                       </a>
                     ) : (

@@ -6,9 +6,9 @@ A design-led portfolio for a second-year Computer Science student at the Univers
 
 ## Featured work
 
-- **Reinforcement-learning robotic arm** — a simulation-first study of reward design, observations, and reproducible control evaluation.
+- **Reinforcement-learning robotic arm** — a simulation-first build based on the open-source ZERO arm's printable geometry, focused on reward design, observations, and reproducible control evaluation.
 - **Formula Student autonomy** — a modular perception, planning, and control loop built around replayable scenarios.
-- **Fitness platform** — a completed first-year group project with workout tracking, social features, maps, media, leaderboards, and data-aware coaching.
+- **Fitness platform** — a [completed first-year group project](https://github.com/xDavid673x/Year1_GroupProject) with workout tracking, social features, maps, media, leaderboards, and data-aware coaching.
 
 Ongoing work is labelled honestly and presented with its next evidence milestone rather than invented results.
 
@@ -44,3 +44,7 @@ This runs ESLint, TypeScript, Vitest, and the production build. Browser QA cover
 - `src/components/three/` — interactive hero scene and fallback
 - `src/data/projects.ts` — typed case-study content
 - `public/images/` — optimized source-project imagery
+
+## Model attribution
+
+The hero uses an optimized, hierarchy-preserving derivative of the [ZERO robotic arm](https://gitee.com/dearxie/zero-robotic-arm) by 零一造物 / XG, sourced from revision `99acada813b943d120e756c9bdfea0e95a5b5327`. The model's GPL-2.0 license and conversion record are retained beside the asset in `public/models/zero-robotic-arm/`.

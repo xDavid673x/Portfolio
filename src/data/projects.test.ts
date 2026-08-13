@@ -26,4 +26,20 @@ describe("project portfolio data", () => {
     expect(projectById["formula-student"].status).toBe("In development");
     expect(projectById["formula-student"].evidenceType).toBe("planned");
   });
+
+  it("links the completed group project to its public source", () => {
+    expect(projectById["fitness-platform"].source).toEqual({
+      href: "https://github.com/xDavid673x/Year1_GroupProject",
+      label: "View project source",
+    });
+    expect(projectById["robotic-arm"].source).toBeUndefined();
+    expect(projectById["formula-student"].source).toBeUndefined();
+  });
+
+  it("identifies the open-source hardware basis without overstating progress", () => {
+    expect(projectById["robotic-arm"].summary).toContain(
+      "open-source ZERO arm's printable geometry",
+    );
+    expect(projectById["robotic-arm"].evidenceType).toBe("planned");
+  });
 });

@@ -15,6 +15,10 @@ export type Project = {
   technologies: string[];
   visual: ProjectVisual;
   tone: "violet" | "lime" | "coral";
+  source?: {
+    href: string;
+    label: string;
+  };
 };
 
 export const projects: Project[] = [
@@ -25,11 +29,11 @@ export const projects: Project[] = [
     status: "In development",
     context: "Independent learning project",
     summary:
-      "A simulation-first study of how reward design and observations shape reliable joint control.",
+      "A simulation-first build based on the open-source ZERO arm's printable geometry, studying how reward design and observations shape reliable joint control.",
     challenge:
       "Make continuous control measurable, reproducible, and honest about failure.",
     approach:
-      "Define observations and actions, establish a baseline, then isolate reward terms across fixed evaluation seeds.",
+      "Recreate the printable arm and its articulated model, define observations and actions, then isolate reward terms across fixed evaluation seeds.",
     evidence:
       "Planned validation: training curves, held-out targets, rollout comparisons, and failed reward designs.",
     evidenceType: "planned",
@@ -80,6 +84,10 @@ export const projects: Project[] = [
     technologies: ["PHP", "MySQL", "JavaScript"],
     visual: "fitness",
     tone: "coral",
+    source: {
+      href: "https://github.com/xDavid673x/Year1_GroupProject",
+      label: "View project source",
+    },
   },
 ];
 

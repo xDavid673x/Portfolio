@@ -1,25 +1,23 @@
 "use client";
 
-import { Line, RoundedBox } from "@react-three/drei";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
+import Image from "next/image";
 import {
   Component,
   type CSSProperties,
   type ErrorInfo,
+  type MutableRefObject,
   type ReactNode,
+  Suspense,
+  useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
 import * as THREE from "three";
 
-import styles from "./HeroScene.module.css";
-
-const ACCENT = "#b8ff4f";
-const ACCENT_SOFT = "#77d9c4";
-const METAL = "#24292d";
-const METAL_LIGHT = "#737b80";
+import { FloatingHeadModel } from "./floating-head-model";
+import styles from "./PortraitScene.module.css";
 
 export type HeroSceneProps = {
   className?: string;
@@ -27,28 +25,22 @@ export type HeroSceneProps = {
   style?: CSSProperties;
 };
 
-type WebGLBoundaryProps = {
-  children: ReactNode;
-  fallback: ReactNode;
-};
+type BoundaryProps = { children: ReactNode; fallback: ReactNode };
+type BoundaryState = { failed: boolean };
 
-type WebGLBoundaryState = {
-  failed: boolean;
-};
+const FALLBACK_PORTRAIT =
+  "/images/avatar/david-floating-head-fallback-v5.png";
 
-class WebGLBoundary extends Component<
-  WebGLBoundaryProps,
-  WebGLBoundaryState
-> {
-  state: WebGLBoundaryState = { failed: false };
+class WebGLBoundary extends Component<BoundaryProps, BoundaryState> {
+  state: BoundaryState = { failed: false };
 
-  static getDerivedStateFromError(): WebGLBoundaryState {
+  static getDerivedStateFromError(): BoundaryState {
     return { failed: true };
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     if (process.env.NODE_ENV !== "production") {
-      console.warn("The portfolio WebGL scene switched to its fallback.", {
+      console.warn("The floating-head scene switched to its fallback.", {
         error,
         componentStack: info.componentStack,
       });
@@ -64,17 +56,12 @@ function canRenderWebGL() {
   try {
     const canvas = document.createElement("canvas");
     const attributes: WebGLContextAttributes = {
-      alpha: true,
-      antialias: false,
       failIfMajorPerformanceCaveat: true,
-      powerPreference: "high-performance",
     };
     const context =
       canvas.getContext("webgl2", attributes) ??
       canvas.getContext("webgl", attributes);
-
     if (!context) return false;
-
     context.getExtension("WEBGL_lose_context")?.loseContext();
     return true;
   } catch {
@@ -87,490 +74,105 @@ function useReducedMotion() {
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const updatePreference = () => setReducedMotion(query.matches);
-
-    updatePreference();
-    query.addEventListener("change", updatePreference);
-    return () => query.removeEventListener("change", updatePreference);
+    const update = () => setReducedMotion(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
   }, []);
 
   return reducedMotion;
 }
 
-function RobotMaterial({ accent = false }: { accent?: boolean }) {
-  return (
-    <meshStandardMaterial
-      color={accent ? ACCENT : METAL}
-      emissive={accent ? "#426e19" : "#050607"}
-      emissiveIntensity={accent ? 0.9 : 0.16}
-      metalness={accent ? 0.56 : 0.88}
-      roughness={accent ? 0.27 : 0.32}
-    />
-  );
-}
-
-function Joint({ radius = 0.43 }: { radius?: number }) {
-  return (
-    <group>
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[radius, radius, 0.86, 40]} />
-        <meshStandardMaterial
-          color={METAL_LIGHT}
-          metalness={0.94}
-          roughness={0.24}
-        />
-      </mesh>
-      <mesh position={[0, 0, 0.445]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[radius * 0.46, radius * 0.46, 0.035, 32]} />
-        <RobotMaterial accent />
-      </mesh>
-      <mesh position={[0, 0, -0.445]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[radius * 0.46, radius * 0.46, 0.035, 32]} />
-        <RobotMaterial accent />
-      </mesh>
-    </group>
-  );
-}
-
-function RobotArm({ reducedMotion }: { reducedMotion: boolean }) {
-  const rig = useRef<THREE.Group>(null);
-  const shoulder = useRef<THREE.Group>(null);
-  const elbow = useRef<THREE.Group>(null);
-  const wrist = useRef<THREE.Group>(null);
-  const energyCore = useRef<THREE.Mesh>(null);
-
-  useFrame((state, delta) => {
-    if (reducedMotion) return;
-
-    const t = state.clock.getElapsedTime();
-    const pointer = state.pointer;
-    const smoothing = Math.min(delta, 0.05);
-
-    if (rig.current) {
-      rig.current.rotation.y = THREE.MathUtils.damp(
-        rig.current.rotation.y,
-        -0.42 + pointer.x * 0.2,
-        4.5,
-        smoothing,
-      );
-    }
-    if (shoulder.current) {
-      shoulder.current.rotation.z = THREE.MathUtils.damp(
-        shoulder.current.rotation.z,
-        -0.6 + pointer.y * 0.1 + Math.sin(t * 0.72) * 0.04,
-        3.8,
-        smoothing,
-      );
-    }
-    if (elbow.current) {
-      elbow.current.rotation.z = THREE.MathUtils.damp(
-        elbow.current.rotation.z,
-        1.08 + pointer.x * 0.08 + Math.sin(t * 0.61 + 1.4) * 0.05,
-        3.8,
-        smoothing,
-      );
-    }
-    if (wrist.current) {
-      wrist.current.rotation.z = THREE.MathUtils.damp(
-        wrist.current.rotation.z,
-        -0.36 + pointer.y * 0.12 + Math.sin(t * 0.86 + 2.2) * 0.04,
-        4.2,
-        smoothing,
-      );
-    }
-    if (energyCore.current) {
-      const pulse = 0.88 + Math.sin(t * 2.8) * 0.12;
-      energyCore.current.scale.setScalar(pulse);
-    }
-  });
-
-  return (
-    <group ref={rig} position={[0.45, -1.72, 0]} rotation={[0, -0.42, 0]}>
-      <mesh position={[0, 0.08, 0]}>
-        <cylinderGeometry args={[0.98, 1.08, 0.27, 56]} />
-        <RobotMaterial />
-      </mesh>
-      <mesh position={[0, 0.225, 0]}>
-        <cylinderGeometry args={[0.72, 0.86, 0.17, 48]} />
-        <meshStandardMaterial
-          color="#0f1214"
-          metalness={0.92}
-          roughness={0.25}
-        />
-      </mesh>
-      <mesh position={[0, 0.315, 0]}>
-        <torusGeometry args={[0.64, 0.035, 12, 72]} />
-        <RobotMaterial accent />
-      </mesh>
-
-      <group ref={shoulder} position={[0, 0.67, 0]} rotation={[0, 0, -0.6]}>
-        <Joint radius={0.49} />
-        <RoundedBox
-          args={[0.7, 2.15, 0.76]}
-          position={[0, 1.08, 0]}
-          radius={0.14}
-          smoothness={5}
-        >
-          <RobotMaterial />
-        </RoundedBox>
-        <RoundedBox
-          args={[0.12, 1.46, 0.79]}
-          position={[-0.25, 1.13, 0]}
-          radius={0.045}
-          smoothness={3}
-        >
-          <RobotMaterial accent />
-        </RoundedBox>
-
-        <group ref={elbow} position={[0, 2.15, 0]} rotation={[0, 0, 1.08]}>
-          <Joint radius={0.43} />
-          <RoundedBox
-            args={[0.58, 1.82, 0.64]}
-            position={[0, 0.91, 0]}
-            radius={0.13}
-            smoothness={5}
-          >
-            <RobotMaterial />
-          </RoundedBox>
-          <RoundedBox
-            args={[0.6, 0.92, 0.12]}
-            position={[0, 0.95, 0.27]}
-            radius={0.04}
-            smoothness={3}
-          >
-            <RobotMaterial accent />
-          </RoundedBox>
-
-          <group ref={wrist} position={[0, 1.82, 0]} rotation={[0, 0, -0.36]}>
-            <Joint radius={0.32} />
-            <mesh position={[0, 0.34, 0]}>
-              <cylinderGeometry args={[0.27, 0.31, 0.7, 36]} />
-              <RobotMaterial />
-            </mesh>
-            <RoundedBox
-              args={[0.76, 0.34, 0.52]}
-              position={[0, 0.75, 0]}
-              radius={0.08}
-              smoothness={4}
-            >
-              <RobotMaterial />
-            </RoundedBox>
-            <RoundedBox
-              args={[0.16, 0.82, 0.2]}
-              position={[-0.25, 1.18, 0]}
-              rotation={[0, 0, 0.11]}
-              radius={0.045}
-              smoothness={3}
-            >
-              <RobotMaterial accent />
-            </RoundedBox>
-            <RoundedBox
-              args={[0.16, 0.82, 0.2]}
-              position={[0.25, 1.18, 0]}
-              rotation={[0, 0, -0.11]}
-              radius={0.045}
-              smoothness={3}
-            >
-              <RobotMaterial accent />
-            </RoundedBox>
-            <mesh ref={energyCore} position={[0, 1.05, 0]}>
-              <sphereGeometry args={[0.11, 24, 24]} />
-              <meshStandardMaterial
-                color="#ecffd3"
-                emissive={ACCENT}
-                emissiveIntensity={3.2}
-                roughness={0.2}
-              />
-            </mesh>
-          </group>
-        </group>
-      </group>
-    </group>
-  );
-}
-
-function CourseGrid() {
-  const geometry = useMemo(() => {
-    const vertices: number[] = [];
-    const width = 8;
-    const depth = 6;
-    const divisionsX = 16;
-    const divisionsZ = 12;
-
-    for (let index = 0; index <= divisionsX; index += 1) {
-      const x = -width / 2 + (index / divisionsX) * width;
-      vertices.push(x, -1.705, -depth / 2, x, -1.705, depth / 2);
-    }
-    for (let index = 0; index <= divisionsZ; index += 1) {
-      const z = -depth / 2 + (index / divisionsZ) * depth;
-      vertices.push(-width / 2, -1.705, z, width / 2, -1.705, z);
-    }
-
-    return new THREE.BufferGeometry().setAttribute(
-      "position",
-      new THREE.Float32BufferAttribute(vertices, 3),
-    );
-  }, []);
-
-  useEffect(() => () => geometry.dispose(), [geometry]);
-
-  return (
-    <group>
-      <lineSegments geometry={geometry}>
-        <lineBasicMaterial
-          color="#61706f"
-          transparent
-          opacity={0.18}
-          depthWrite={false}
-        />
-      </lineSegments>
-      <mesh position={[0, -1.73, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[8, 6]} />
-        <meshStandardMaterial
-          color="#0b1011"
-          metalness={0.2}
-          roughness={0.88}
-          transparent
-          opacity={0.48}
-        />
-      </mesh>
-    </group>
-  );
-}
-
-function Trajectory({ reducedMotion }: { reducedMotion: boolean }) {
-  const pulses = useRef<THREE.Group>(null);
-  const curve = useMemo(
-    () =>
-      new THREE.CatmullRomCurve3(
-        [
-          new THREE.Vector3(-4.15, -1.61, 1.5),
-          new THREE.Vector3(-2.45, -1.52, 0.35),
-          new THREE.Vector3(-0.85, -1.25, 1.2),
-          new THREE.Vector3(1.85, -1.42, 1.05),
-          new THREE.Vector3(2.85, -0.15, 0.4),
-          new THREE.Vector3(1.1, 1.12, 0.08),
-          new THREE.Vector3(0.22, 2.42, 0.06),
-        ],
-        false,
-        "catmullrom",
-        0.34,
-      ),
-    [],
-  );
-  const path = useMemo(() => curve.getPoints(120), [curve]);
-  const waypoints = useMemo(
-    () => [0.08, 0.28, 0.49, 0.69, 0.88].map((offset) => curve.getPointAt(offset)),
-    [curve],
-  );
-
-  useFrame((state) => {
-    if (reducedMotion || !pulses.current) return;
-
-    const t = state.clock.getElapsedTime() * 0.07;
-    pulses.current.children.forEach((pulse, index) => {
-      const progress = (t + index / pulses.current!.children.length) % 1;
-      pulse.position.copy(curve.getPointAt(progress));
-      const breathing = 0.8 + Math.sin(progress * Math.PI) * 0.55;
-      pulse.scale.setScalar(breathing);
-    });
-  });
-
-  return (
-    <group>
-      <Line
-        points={path}
-        color={ACCENT}
-        lineWidth={1.3}
-        transparent
-        opacity={0.6}
-      />
-      <Line
-        points={path.map((point) => point.clone().add(new THREE.Vector3(0, -0.045, 0)))}
-        color={ACCENT_SOFT}
-        lineWidth={4.5}
-        transparent
-        opacity={0.08}
-      />
-      {waypoints.map((point, index) => (
-        <group key={index} position={point}>
-          <mesh rotation={[Math.PI / 2, 0, 0]}>
-            <torusGeometry args={[0.12, 0.012, 8, 28]} />
-            <meshBasicMaterial color={ACCENT_SOFT} transparent opacity={0.8} />
-          </mesh>
-          <mesh>
-            <sphereGeometry args={[0.028, 12, 12]} />
-            <meshBasicMaterial color="#f4ffe7" />
-          </mesh>
-        </group>
-      ))}
-      <group ref={pulses}>
-        {Array.from({ length: 5 }, (_, index) => (
-          <mesh key={index} position={curve.getPointAt(index / 5)}>
-            <sphereGeometry args={[0.055, 16, 16]} />
-            <meshBasicMaterial color={ACCENT} toneMapped={false} />
-          </mesh>
-        ))}
-      </group>
-    </group>
-  );
-}
-
-function SensorField({ reducedMotion }: { reducedMotion: boolean }) {
-  const cloud = useRef<THREE.Points>(null);
-  const positions = useMemo(() => {
-    const count = 220;
-    const data = new Float32Array(count * 3);
-    const goldenAngle = Math.PI * (3 - Math.sqrt(5));
-
-    for (let index = 0; index < count; index += 1) {
-      const radius = 3.7 + ((index * 17) % 31) * 0.025;
-      const angle = index * goldenAngle;
-      const y = -1.2 + ((index * 29) % count) / count * 4.8;
-      data[index * 3] = Math.cos(angle) * radius;
-      data[index * 3 + 1] = y;
-      data[index * 3 + 2] = Math.sin(angle) * radius - 1.4;
-    }
-
-    return data;
-  }, []);
-
-  useFrame((state, delta) => {
-    if (reducedMotion || !cloud.current) return;
-    cloud.current.rotation.y += delta * 0.018;
-    cloud.current.position.y = Math.sin(state.clock.getElapsedTime() * 0.2) * 0.08;
-  });
-
-  return (
-    <points ref={cloud}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-      </bufferGeometry>
-      <pointsMaterial
-        color="#a8ddd3"
-        size={0.026}
-        sizeAttenuation
-        transparent
-        opacity={0.42}
-        depthWrite={false}
-      />
-    </points>
-  );
-}
-
-function TargetModule({ reducedMotion }: { reducedMotion: boolean }) {
-  const scan = useRef<THREE.Group>(null);
-
-  useFrame((state, delta) => {
-    if (reducedMotion || !scan.current) return;
-    scan.current.rotation.z -= delta * 0.22;
-    const pulse = 1 + Math.sin(state.clock.getElapsedTime() * 1.6) * 0.08;
-    scan.current.scale.setScalar(pulse);
-  });
-
-  return (
-    <group position={[2.85, -1.35, 0.42]}>
-      <RoundedBox args={[0.72, 0.72, 0.72]} radius={0.08} smoothness={4}>
-        <meshStandardMaterial
-          color="#141a1c"
-          metalness={0.82}
-          roughness={0.34}
-        />
-      </RoundedBox>
-      <mesh position={[0, 0.38, 0]}>
-        <sphereGeometry args={[0.07, 16, 16]} />
-        <meshBasicMaterial color={ACCENT} toneMapped={false} />
-      </mesh>
-      <group ref={scan} rotation={[Math.PI / 2, 0, 0]}>
-        <mesh>
-          <torusGeometry args={[0.72, 0.012, 8, 64]} />
-          <meshBasicMaterial color={ACCENT} transparent opacity={0.48} />
-        </mesh>
-        <mesh rotation={[0.38, 0.2, 0.6]}>
-          <torusGeometry args={[0.98, 0.009, 8, 72]} />
-          <meshBasicMaterial color={ACCENT_SOFT} transparent opacity={0.25} />
-        </mesh>
-      </group>
-    </group>
-  );
-}
-
-function CameraRig({ reducedMotion }: { reducedMotion: boolean }) {
-  const getSceneState = useThree((state) => state.get);
+function CameraRig() {
   const size = useThree((state) => state.size);
+  const get = useThree((state) => state.get);
+  const invalidate = useThree((state) => state.invalidate);
 
   useEffect(() => {
-    const camera = getSceneState().camera;
-    camera.position.set(size.width < 640 ? 6.9 : 6.25, 2.7, size.width < 640 ? 10.8 : 9.25);
-    camera.lookAt(0, 0.15, 0);
-  }, [getSceneState, size.width]);
-
-  useFrame((state, delta) => {
-    if (reducedMotion) return;
-    const camera = state.camera;
-    const smoothing = Math.min(delta, 0.05);
-    camera.position.x = THREE.MathUtils.damp(
-      camera.position.x,
-      (size.width < 640 ? 6.9 : 6.25) + state.pointer.x * 0.34,
-      2.4,
-      smoothing,
-    );
-    camera.position.y = THREE.MathUtils.damp(
-      camera.position.y,
-      2.7 + state.pointer.y * 0.22,
-      2.4,
-      smoothing,
-    );
-    camera.lookAt(0, 0.15, 0);
-  });
+    const camera = get().camera;
+    const cameraZ = size.width < 620 ? 13.8 : size.width < 900 ? 12.5 : 11.7;
+    camera.position.set(0, 0.08, cameraZ);
+    camera.lookAt(0, 0.12, 0);
+    invalidate();
+  }, [get, invalidate, size.width]);
 
   return null;
 }
 
-function Scene({ reducedMotion }: { reducedMotion: boolean }) {
-  const viewport = useThree((state) => state.viewport);
-  const invalidate = useThree((state) => state.invalidate);
-  const scale = THREE.MathUtils.clamp(viewport.width / 8.8, 0.72, 1);
-
-  useEffect(() => invalidate(), [invalidate, reducedMotion, viewport.width]);
+function StudioLighting() {
+  const compact = useThree((state) => state.size.width < 620);
+  const shadowSize = compact ? 512 : 1024;
 
   return (
     <>
-      <fog attach="fog" args={["#070a0c", 8.5, 17]} />
-      <ambientLight intensity={0.72} color="#9eb8b4" />
-      <directionalLight
-        position={[4.8, 7, 5]}
-        intensity={3.4}
-        color="#f4ffe8"
+      <ambientLight color="#9ba3bd" intensity={0.2} />
+      <hemisphereLight
+        color="#fff1df"
+        groundColor="#17131f"
+        intensity={compact ? 0.42 : 0.52}
+      />
+      <spotLight
+        castShadow
+        position={[-4.5, 5.7, 7]}
+        color="#ffe7d1"
+        intensity={compact ? 42 : 56}
+        distance={22}
+        decay={2}
+        angle={0.58}
+        penumbra={0.92}
+        shadow-bias={-0.0002}
+        shadow-mapSize-height={shadowSize}
+        shadow-mapSize-width={shadowSize}
+        shadow-radius={4}
       />
       <pointLight
-        position={[-4, 1.5, 2]}
-        intensity={21}
-        distance={7.5}
-        color={ACCENT_SOFT}
+        position={[4.2, 1.6, 5.5]}
+        color="#b8caff"
+        intensity={compact ? 13 : 19}
+        distance={16}
+        decay={2}
       />
       <pointLight
-        position={[2.5, 2.8, -2.8]}
-        intensity={17}
-        distance={6}
-        color={ACCENT}
+        position={[3.4, 4.2, -3.8]}
+        color="#d7b3ff"
+        intensity={compact ? 18 : 26}
+        distance={14}
+        decay={2}
       />
+    </>
+  );
+}
 
-      <CameraRig reducedMotion={reducedMotion} />
-      <group scale={scale} position={[0, scale < 0.8 ? -0.22 : 0, 0]}>
-        <CourseGrid />
-        <SensorField reducedMotion={reducedMotion} />
-        <Trajectory reducedMotion={reducedMotion} />
-        <TargetModule reducedMotion={reducedMotion} />
-        <RobotArm reducedMotion={reducedMotion} />
-      </group>
+function Scene({
+  active,
+  onReady,
+  pointerTarget,
+  reducedMotion,
+}: {
+  active: boolean;
+  onReady: () => void;
+  pointerTarget: MutableRefObject<THREE.Vector2>;
+  reducedMotion: boolean;
+}) {
+  return (
+    <>
+      <CameraRig />
+      <StudioLighting />
+      <Suspense fallback={null}>
+        <FloatingHeadModel
+          active={active}
+          onReady={onReady}
+          pointerTarget={pointerTarget}
+          reducedMotion={reducedMotion}
+        />
+      </Suspense>
     </>
   );
 }
 
 export function HeroSceneFallback({
   className,
-  label = "An articulated robotic arm mapping an autonomous trajectory",
+  label = "A calm, stylized 3D floating head based on David's supplied selfies",
   style,
 }: HeroSceneProps) {
   const classes = [styles.shell, styles.fallbackShell, className]
@@ -579,178 +181,135 @@ export function HeroSceneFallback({
 
   return (
     <div className={classes} role="img" aria-label={label} style={style}>
-      <div className={styles.fallbackGrid} aria-hidden="true" />
-      <svg
-        className={styles.fallbackGraphic}
-        viewBox="0 0 800 620"
-        preserveAspectRatio="xMidYMid meet"
+      <div className={styles.fallbackHalo} aria-hidden="true" />
+      <Image
+        alt=""
         aria-hidden="true"
-      >
-        <defs>
-          <linearGradient id="fallback-metal" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#858e91" />
-            <stop offset="0.46" stopColor="#242a2d" />
-            <stop offset="1" stopColor="#101416" />
-          </linearGradient>
-          <filter id="fallback-glow" x="-100%" y="-100%" width="300%" height="300%">
-            <feGaussianBlur stdDeviation="5" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-
-        <path
-          className={styles.fallbackRouteGlow}
-          d="M 56 518 C 166 462 224 536 322 493 C 445 438 605 535 707 388 C 738 344 688 263 604 274 C 535 282 508 212 487 151"
-        />
-        <path
-          className={styles.fallbackRoute}
-          d="M 56 518 C 166 462 224 536 322 493 C 445 438 605 535 707 388 C 738 344 688 263 604 274 C 535 282 508 212 487 151"
-        />
-        {["56 518", "215 504", "387 470", "621 464", "694 324", "552 247"].map(
-          (point) => {
-            const [cx, cy] = point.split(" ");
-            return (
-              <g key={point}>
-                <circle cx={cx} cy={cy} r="10" className={styles.fallbackWaypoint} />
-                <circle cx={cx} cy={cy} r="2.5" className={styles.fallbackWaypointCore} />
-              </g>
-            );
-          },
-        )}
-
-        <ellipse cx="395" cy="532" rx="106" ry="25" fill="#050708" opacity="0.75" />
-        <path d="M 310 507 L 336 469 L 452 469 L 481 507 Z" fill="url(#fallback-metal)" />
-        <rect x="333" y="500" width="145" height="27" rx="12" fill="#1a2022" />
-        <path d="M 343 500 H 468" stroke={ACCENT} strokeWidth="4" opacity="0.8" />
-
-        <g className={styles.fallbackArmLinks}>
-          <path d="M 394 474 L 482 343" />
-          <path d="M 482 343 L 444 220" />
-        </g>
-        <g className={styles.fallbackArmCore}>
-          <path d="M 394 474 L 482 343" />
-          <path d="M 482 343 L 444 220" />
-        </g>
-        <g className={styles.fallbackArmAccent}>
-          <path d="M 384 466 L 466 342" />
-          <path d="M 492 340 L 456 224" />
-        </g>
-
-        {["394 474 30", "482 343 27", "444 220 22"].map((joint) => {
-          const [cx, cy, radius] = joint.split(" ");
-          return (
-            <g key={joint}>
-              <circle cx={cx} cy={cy} r={radius} fill="url(#fallback-metal)" stroke="#8d9898" strokeWidth="2" />
-              <circle cx={cx} cy={cy} r={Number(radius) * 0.42} fill="#172217" stroke={ACCENT} strokeWidth="4" />
-            </g>
-          );
-        })}
-
-        <path d="M 444 200 L 474 164" stroke="#323a3d" strokeWidth="25" strokeLinecap="round" />
-        <path d="M 474 164 L 449 129" stroke={ACCENT} strokeWidth="10" strokeLinecap="round" />
-        <path d="M 474 164 L 504 135" stroke={ACCENT} strokeWidth="10" strokeLinecap="round" />
-        <circle cx="477" cy="157" r="7" fill="#f2ffe2" filter="url(#fallback-glow)" />
-      </svg>
-      <div className={styles.fallbackVignette} aria-hidden="true" />
+        className={styles.fallbackPortrait}
+        height={1254}
+        loading="eager"
+        priority
+        src={FALLBACK_PORTRAIT}
+        width={1254}
+      />
+      <div className={styles.vignette} aria-hidden="true" />
     </div>
   );
 }
 
 export function HeroScene({
   className,
-  label = "An interactive articulated robotic arm mapping an autonomous trajectory",
+  label = "An interactive, true 3D floating-head avatar of David with fixed eyes and subtle head movement",
   style,
 }: HeroSceneProps) {
-  const [webGLReady, setWebGLReady] = useState(false);
-  const [isInViewport, setIsInViewport] = useState(true);
+  const [webGLReady, setWebGLReady] = useState<boolean | null>(null);
+  const [isVisible, setIsVisible] = useState(true);
   const [isDocumentVisible, setIsDocumentVisible] = useState(true);
-  const sceneRoot = useRef<HTMLDivElement>(null);
+  const [modelReady, setModelReady] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
+  const pointerTarget = useRef(new THREE.Vector2());
   const reducedMotion = useReducedMotion();
+  const markModelReady = useCallback(() => setModelReady(true), []);
+  const active = !reducedMotion && isVisible && isDocumentVisible;
 
   useEffect(() => {
-    const checkFrame = window.requestAnimationFrame(() => {
+    const frame = window.requestAnimationFrame(() => {
       setWebGLReady(canRenderWebGL());
     });
-
-    return () => window.cancelAnimationFrame(checkFrame);
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   useEffect(() => {
-    if (!webGLReady) return;
-
-    const root = sceneRoot.current;
-    const updateDocumentVisibility = () =>
-      setIsDocumentVisible(document.visibilityState !== "hidden");
-
-    updateDocumentVisibility();
-    document.addEventListener("visibilitychange", updateDocumentVisibility);
-
-    if (!root || !("IntersectionObserver" in window)) {
-      return () =>
-        document.removeEventListener(
-          "visibilitychange",
-          updateDocumentVisibility,
-        );
-    }
-
+    const element = root.current;
+    if (!element || !("IntersectionObserver" in window)) return;
     const observer = new IntersectionObserver(
-      ([entry]) => setIsInViewport(entry.isIntersecting),
+      ([entry]) => setIsVisible(entry.isIntersecting),
       { rootMargin: "120px 0px" },
     );
-    observer.observe(root);
-
-    return () => {
-      observer.disconnect();
-      document.removeEventListener(
-        "visibilitychange",
-        updateDocumentVisibility,
-      );
-    };
+    observer.observe(element);
+    return () => observer.disconnect();
   }, [webGLReady]);
+
+  useEffect(() => {
+    const update = () => setIsDocumentVisible(!document.hidden);
+    update();
+    document.addEventListener("visibilitychange", update);
+    return () => document.removeEventListener("visibilitychange", update);
+  }, []);
+
+  const resetPointer = useCallback(() => pointerTarget.current.set(0, 0), []);
+
+  useEffect(() => {
+    if (!active) resetPointer();
+  }, [active, resetPointer]);
 
   const fallback = (
     <HeroSceneFallback className={className} label={label} style={style} />
   );
-
-  if (!webGLReady) return fallback;
+  if (webGLReady === null || !webGLReady) return fallback;
 
   const classes = [styles.shell, className].filter(Boolean).join(" ");
-  const sceneActive = !reducedMotion && isInViewport && isDocumentVisible;
 
   return (
     <WebGLBoundary fallback={fallback}>
       <div
         className={classes}
-        data-render-mode={sceneActive ? "continuous" : "paused"}
-        ref={sceneRoot}
+        ref={root}
         role="img"
         aria-label={label}
         style={style}
+        onPointerCancel={resetPointer}
+        onPointerLeave={resetPointer}
+        onPointerMove={(event) => {
+          if (event.pointerType !== "mouse" || reducedMotion) return;
+          const bounds = event.currentTarget.getBoundingClientRect();
+          const x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1;
+          const y = 1 - ((event.clientY - bounds.top) / bounds.height) * 2;
+          pointerTarget.current.set(
+            THREE.MathUtils.clamp(x, -1, 1),
+            THREE.MathUtils.clamp(y, -1, 1),
+          );
+        }}
       >
+        <div className={styles.halo} aria-hidden="true" />
+        <Image
+          alt=""
+          aria-hidden="true"
+          className={`${styles.loadingPortrait} ${modelReady ? styles.loadingPortraitHidden : ""}`}
+          height={1254}
+          priority
+          src={FALLBACK_PORTRAIT}
+          width={1254}
+        />
         <Canvas
           className={styles.canvas}
           aria-hidden="true"
-          camera={{ fov: 38, near: 0.1, far: 30, position: [6.25, 2.7, 9.25] }}
+          camera={{ fov: 29, near: 0.1, far: 40, position: [0, 0.08, 11.7] }}
           dpr={[1, 1.5]}
-          flat
-          frameloop={sceneActive ? "always" : "demand"}
+          frameloop={active ? "always" : "demand"}
           gl={{
             alpha: true,
             antialias: true,
             powerPreference: "high-performance",
           }}
+          shadows="soft"
           onCreated={({ gl }) => {
             gl.outputColorSpace = THREE.SRGBColorSpace;
             gl.toneMapping = THREE.ACESFilmicToneMapping;
-            gl.toneMappingExposure = 1.08;
+            gl.toneMappingExposure = 1.05;
+            gl.shadowMap.enabled = true;
+            gl.shadowMap.type = THREE.PCFSoftShadowMap;
+            gl.setClearColor(0x000000, 0);
           }}
         >
-          <Scene reducedMotion={reducedMotion} />
+          <Scene
+            active={active}
+            onReady={markModelReady}
+            pointerTarget={pointerTarget}
+            reducedMotion={reducedMotion}
+          />
         </Canvas>
-        <div className={styles.fallbackVignette} aria-hidden="true" />
+        <div className={styles.vignette} aria-hidden="true" />
       </div>
     </WebGLBoundary>
   );
