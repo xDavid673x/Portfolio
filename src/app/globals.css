@@ -633,9 +633,7 @@ button:hover .arrow-icon--back {
   overflow: hidden;
   border: 1px solid rgba(8, 9, 8, 0.12);
   border-radius: var(--radius-large) var(--radius-large) 0 0;
-  background:
-    radial-gradient(circle at 12% 6%, rgba(255, 112, 72, 0.13), transparent 20%),
-    var(--paper);
+  background: var(--paper);
   color: var(--ink);
 }
 
