@@ -333,10 +333,6 @@ export function PortfolioPage() {
               href={`#case-${project.id}`}
               key={project.id}
             >
-              <div className="bento-card__topline">
-                <span>{project.status}</span>
-                <span>{project.context}</span>
-              </div>
               <div className="bento-card__visual group-hover:scale-105 transition-transform duration-700 ease-out">
                 <ProjectVisualPanel type={project.visual} />
               </div>
