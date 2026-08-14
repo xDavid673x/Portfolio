@@ -21,6 +21,10 @@ const perceptionPoints = [
 
 const telemetryBands = ["PERCEPTION", "PLANNING", "CONTROL"] as const;
 
+const simulationKeyTimes = "0;0.12;0.25;0.42;0.54;0.68;0.82;0.94;1";
+const simulationKeySplines =
+  "0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1";
+
 function joinClassNames(...classNames: Array<string | undefined>) {
   return classNames.filter(Boolean).join(" ");
 }
@@ -30,7 +34,7 @@ export function RoboticArmVisual({ className }: { className?: string }) {
     <figure
       className={joinClassNames(styles.visual, styles.robotVisual, className)}
       role="img"
-      aria-label="Editorial reinforcement-learning study showing a detailed articulated robotic arm reaching toward a sampled target with a compact reward trace."
+      aria-label="Reinforcement-learning simulation showing an articulated robotic arm reaching for a target payload, closing its gripper, and returning along a sampled path."
     >
       <div className={styles.technicalHeader} aria-hidden="true">
         <span>ZERO / REINFORCEMENT LEARNING</span>
@@ -58,6 +62,29 @@ export function RoboticArmVisual({ className }: { className?: string }) {
               d="M144 240C210 203 259 164 327 143C393 123 449 99 514 75"
             />
 
+            <circle className={styles.robotTraceDot} cx="0" cy="0" r="4">
+              <animateMotion
+                dur="9s"
+                repeatCount="indefinite"
+                calcMode="paced"
+                path="M144 240C210 203 259 164 327 143C393 123 449 99 514 75"
+              />
+            </circle>
+
+            <g className={styles.robotTargetPayload}>
+              <rect x="498" y="63" width="25" height="22" rx="2" />
+              <path d="M498 72H523M510 63V85" />
+              <animate
+                attributeName="opacity"
+                dur="9s"
+                repeatCount="indefinite"
+                calcMode="spline"
+                keyTimes={simulationKeyTimes}
+                keySplines={simulationKeySplines}
+                values="1;1;1;0;0;0;0;1;1"
+              />
+            </g>
+
             <g className={styles.robotGoal}>
               <circle cx="514" cy="75" r="27" />
               <circle cx="514" cy="75" r="8" />
@@ -75,41 +102,116 @@ export function RoboticArmVisual({ className }: { className?: string }) {
               <circle className={styles.robotBolt} cx="142" cy="240" r="4" />
             </g>
 
-            <g className={styles.robotUpperLink}>
-              <path
-                className={styles.robotLinkShell}
-                d="M132 220L266 143Q278 136 288 151L294 160Q300 173 286 182L155 259Q143 266 133 252L125 240Q118 228 132 220Z"
-              />
-              <path
-                className={styles.robotLinkInset}
-                d="M153 222L265 156Q272 152 278 160L281 165Q285 171 277 176L162 244Z"
-              />
-              <circle className={styles.robotJointOuter} cx="279" cy="163" r="26" />
-              <circle className={styles.robotJointCore} cx="279" cy="163" r="14" />
-              <circle className={styles.robotBolt} cx="279" cy="163" r="3.5" />
-            </g>
+            <g className={styles.robotUpperAssembly}>
+              <g className={styles.robotUpperLink}>
+                <path
+                  className={styles.robotLinkShell}
+                  d="M132 220L266 143Q278 136 288 151L294 160Q300 173 286 182L155 259Q143 266 133 252L125 240Q118 228 132 220Z"
+                />
+                <path
+                  className={styles.robotLinkInset}
+                  d="M153 222L265 156Q272 152 278 160L281 165Q285 171 277 176L162 244Z"
+                />
+                <circle className={styles.robotJointOuter} cx="279" cy="163" r="26" />
+                <circle className={styles.robotJointCore} cx="279" cy="163" r="14" />
+                <circle className={styles.robotBolt} cx="279" cy="163" r="3.5" />
+              </g>
 
-            <g className={styles.robotForearmLink}>
-              <path
-                className={styles.robotLinkShell}
-                d="M273 142L395 89Q408 84 417 97L424 108Q432 121 418 130L293 185Q281 190 272 178L265 166Q257 151 273 142Z"
-              />
-              <path
-                className={styles.robotLinkInset}
-                d="M294 147L394 103Q401 100 406 106L410 112Q414 119 406 123L299 170Z"
-              />
-              <circle className={styles.robotJointOuter} cx="404" cy="111" r="21" />
-              <circle className={styles.robotJointCore} cx="404" cy="111" r="11" />
-              <circle className={styles.robotBolt} cx="404" cy="111" r="3" />
-            </g>
+              <g className={styles.robotForearmAssembly}>
+                <g className={styles.robotForearmLink}>
+                  <path
+                    className={styles.robotLinkShell}
+                    d="M273 142L395 89Q408 84 417 97L424 108Q432 121 418 130L293 185Q281 190 272 178L265 166Q257 151 273 142Z"
+                  />
+                  <path
+                    className={styles.robotLinkInset}
+                    d="M294 147L394 103Q401 100 406 106L410 112Q414 119 406 123L299 170Z"
+                  />
+                  <circle className={styles.robotJointOuter} cx="404" cy="111" r="21" />
+                  <circle className={styles.robotJointCore} cx="404" cy="111" r="11" />
+                  <circle className={styles.robotBolt} cx="404" cy="111" r="3" />
+                </g>
 
-            <g className={styles.robotWristAssembly}>
-              <path
-                className={styles.robotWristHousing}
-                d="M410 94L459 70Q469 66 475 77L481 88Q486 98 475 104L423 129Z"
+                <g className={styles.robotWristAssembly}>
+                  <path
+                    className={styles.robotWristHousing}
+                    d="M410 94L459 70Q469 66 475 77L481 88Q486 98 475 104L423 129Z"
+                  />
+                  <path className={styles.robotPalm} d="M461 70L482 59L494 83L474 96Z" />
+                  <g className={styles.robotHeldPayload}>
+                    <rect x="497" y="69" width="20" height="17" rx="2" />
+                    <path d="M497 76H517M507 69V86" />
+                    <animate
+                      attributeName="opacity"
+                      dur="9s"
+                      repeatCount="indefinite"
+                      calcMode="spline"
+                      keyTimes={simulationKeyTimes}
+                      keySplines={simulationKeySplines}
+                      values="0;0;0;1;1;1;0;0;0"
+                    />
+                  </g>
+                  <g className={styles.robotGripperUpper}>
+                    <path d="M486 65L507 53L518 58" />
+                    <animateTransform
+                      attributeName="transform"
+                      type="rotate"
+                      dur="9s"
+                      repeatCount="indefinite"
+                      calcMode="spline"
+                      keyTimes={simulationKeyTimes}
+                      keySplines={simulationKeySplines}
+                      values="0 486 65;0 486 65;0 486 65;0 486 65;-11 486 65;-11 486 65;0 486 65;0 486 65;0 486 65"
+                    />
+                  </g>
+                  <g className={styles.robotGripperLower}>
+                    <path d="M492 86L514 94L520 88" />
+                    <animateTransform
+                      attributeName="transform"
+                      type="rotate"
+                      dur="9s"
+                      repeatCount="indefinite"
+                      calcMode="spline"
+                      keyTimes={simulationKeyTimes}
+                      keySplines={simulationKeySplines}
+                      values="0 492 86;0 492 86;0 492 86;0 492 86;11 492 86;11 492 86;0 492 86;0 492 86;0 492 86"
+                    />
+                  </g>
+
+                  <animateTransform
+                    attributeName="transform"
+                    type="rotate"
+                    dur="9s"
+                    repeatCount="indefinite"
+                    calcMode="spline"
+                    keyTimes={simulationKeyTimes}
+                    keySplines={simulationKeySplines}
+                    values="0 404 111;-18 404 111;-18 404 111;-5 404 111;0 404 111;0 404 111;-18 404 111;-18 404 111;0 404 111"
+                  />
+                </g>
+
+                <animateTransform
+                  attributeName="transform"
+                  type="rotate"
+                  dur="9s"
+                  repeatCount="indefinite"
+                  calcMode="spline"
+                  keyTimes={simulationKeyTimes}
+                  keySplines={simulationKeySplines}
+                  values="0 279 163;24 279 163;24 279 163;6 279 163;0 279 163;0 279 163;24 279 163;24 279 163;0 279 163"
+                />
+              </g>
+
+              <animateTransform
+                attributeName="transform"
+                type="rotate"
+                dur="9s"
+                repeatCount="indefinite"
+                calcMode="spline"
+                keyTimes={simulationKeyTimes}
+                keySplines={simulationKeySplines}
+                values="0 142 240;12 142 240;12 142 240;3 142 240;0 142 240;0 142 240;12 142 240;12 142 240;0 142 240"
               />
-              <path className={styles.robotPalm} d="M461 70L482 59L494 83L474 96Z" />
-              <path className={styles.robotGripper} d="M486 65L507 53L518 58M492 86L514 94L520 88" />
             </g>
           </svg>
 
