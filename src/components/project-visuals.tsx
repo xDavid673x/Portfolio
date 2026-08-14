@@ -30,157 +30,115 @@ export function RoboticArmVisual({ className }: { className?: string }) {
     <figure
       className={joinClassNames(styles.visual, styles.robotVisual, className)}
       role="img"
-      aria-label="Reinforcement-learning workspace showing a robotic arm, its sampled trajectory, a goal position, and an abstract reward signal."
+      aria-label="Editorial reinforcement-learning study showing a detailed articulated robotic arm reaching toward a sampled target with a compact reward trace."
     >
       <div className={styles.technicalHeader} aria-hidden="true">
-        <span></span>
+        <span>ZERO / REINFORCEMENT LEARNING</span>
         <span className={styles.headerState}>
-          <i /> SIMULATION
+          <i /> ROLLOUT 0247
         </span>
       </div>
 
       <div className={styles.robotLayout} aria-hidden="true">
         <div className={styles.robotStage}>
-          <div className={styles.axisLabels}>
-            <span>Z</span>
-            <span>X</span>
-          </div>
           <svg
             className={styles.robotSvg}
-            viewBox="0 0 320 230"
+            viewBox="0 0 560 330"
             preserveAspectRatio="xMidYMid meet"
           >
-            <g className={styles.robotGrid}>
-              <path d="M18 194H302M18 160H302M18 126H302M18 92H302M18 58H302" />
-              <path d="M48 24V208M95 24V208M142 24V208M189 24V208M236 24V208M283 24V208" />
-            </g>
-
-            <g className={styles.reachEnvelope}>
-              <ellipse cx="155" cy="133" rx="111" ry="61" transform="rotate(-24 155 133)" />
-              <path d="M88 180C119 155 144 127 183 112C211 101 231 80 250 57" />
-              <path d="M88 180C112 166 128 149 151 141C187 128 210 98 250 57" />
-            </g>
-
-            <g className={styles.armGhost}>
-              <path d="M88 174L116 142L168 124L213 85" />
-              <path d="M88 174L108 134L157 103L224 70" />
+            <g className={styles.robotField}>
+              <path d="M34 282H530" />
+              <path d="M74 282A226 226 0 0 1 500 108" />
+              <path d="M102 282A198 198 0 0 1 487 128" />
+              <path d="M68 75H188M68 75V195" />
             </g>
 
             <path
-              className={styles.trajectoryGhost}
-              d="M88 180C105 150 116 119 155 109C196 98 211 71 247 60"
-            />
-            <path
-              className={styles.trajectory}
-              d="M88 180C105 150 116 119 155 109C196 98 211 71 247 60"
+              className={styles.robotTrajectory}
+              d="M144 240C210 203 259 164 327 143C393 123 449 99 514 75"
             />
 
-            <g className={styles.goal}>
-              <circle cx="250" cy="57" r="21" />
-              <circle cx="250" cy="57" r="6" />
-              <path d="M250 29V40M250 74V85M222 57H233M267 57H278" />
+            <g className={styles.robotGoal}>
+              <circle cx="514" cy="75" r="27" />
+              <circle cx="514" cy="75" r="8" />
+              <path d="M514 38V51M514 99V112M477 75H490M538 75H551" />
             </g>
 
-            <g className={styles.armBase}>
-              <path d="M55 195H119L110 211H64Z" />
-              <rect x="72" y="175" width="31" height="22" rx="5" />
-              <circle cx="88" cy="174" r="15" />
-            </g>
-            <g className={styles.armUpper}>
-              <path d="M88 174L127 118" />
-              <path d="M96 178L135 122" />
-              <circle cx="131" cy="120" r="14" />
-            </g>
-            <g className={styles.armForearm}>
-              <path d="M132 120L191 91" />
-              <path d="M138 130L197 101" />
-              <circle cx="195" cy="96" r="12" />
-              <path d="M204 88L224 70" />
-              <path d="M213 97L232 79" />
-              <path d="M224 70L237 69M232 79L238 88" />
+            <g className={styles.robotBase}>
+              <path className={styles.robotBasePlate} d="M72 286H198L181 315H89Z" />
+              <path
+                className={styles.robotPedestal}
+                d="M99 286V250C99 228 116 211 138 211H148C170 211 187 228 187 250V286Z"
+              />
+              <circle className={styles.robotJointOuter} cx="142" cy="240" r="31" />
+              <circle className={styles.robotJointCore} cx="142" cy="240" r="18" />
+              <circle className={styles.robotBolt} cx="142" cy="240" r="4" />
             </g>
 
-            <g className={styles.samplePoses}>
-              <circle cx="124" cy="131" r="3" />
-              <circle cx="154" cy="109" r="3" />
-              <circle cx="188" cy="94" r="3" />
-              <circle cx="219" cy="77" r="3" />
+            <g className={styles.robotUpperLink}>
+              <path
+                className={styles.robotLinkShell}
+                d="M132 220L266 143Q278 136 288 151L294 160Q300 173 286 182L155 259Q143 266 133 252L125 240Q118 228 132 220Z"
+              />
+              <path
+                className={styles.robotLinkInset}
+                d="M153 222L265 156Q272 152 278 160L281 165Q285 171 277 176L162 244Z"
+              />
+              <circle className={styles.robotJointOuter} cx="279" cy="163" r="26" />
+              <circle className={styles.robotJointCore} cx="279" cy="163" r="14" />
+              <circle className={styles.robotBolt} cx="279" cy="163" r="3.5" />
+            </g>
+
+            <g className={styles.robotForearmLink}>
+              <path
+                className={styles.robotLinkShell}
+                d="M273 142L395 89Q408 84 417 97L424 108Q432 121 418 130L293 185Q281 190 272 178L265 166Q257 151 273 142Z"
+              />
+              <path
+                className={styles.robotLinkInset}
+                d="M294 147L394 103Q401 100 406 106L410 112Q414 119 406 123L299 170Z"
+              />
+              <circle className={styles.robotJointOuter} cx="404" cy="111" r="21" />
+              <circle className={styles.robotJointCore} cx="404" cy="111" r="11" />
+              <circle className={styles.robotBolt} cx="404" cy="111" r="3" />
+            </g>
+
+            <g className={styles.robotWristAssembly}>
+              <path
+                className={styles.robotWristHousing}
+                d="M410 94L459 70Q469 66 475 77L481 88Q486 98 475 104L423 129Z"
+              />
+              <path className={styles.robotPalm} d="M461 70L482 59L494 83L474 96Z" />
+              <path className={styles.robotGripper} d="M486 65L507 53L518 58M492 86L514 94L520 88" />
             </g>
           </svg>
-          <div className={styles.stageLegend}>
-            <span><i className={styles.legendGoal} /> Goal</span>
-            <span><i className={styles.legendPath} /> Sampled path</span>
-          </div>
-        </div>
 
-        <aside className={styles.rewardPanel}>
-          <div className={styles.panelTitleRow}>
-            <span>REWARD SIGNAL</span>
-            <span>LIVE TRACE</span>
-          </div>
-          <svg className={styles.rewardChart} viewBox="0 0 180 86" preserveAspectRatio="none">
-            <g className={styles.chartGrid}>
-              <path d="M0 17H180M0 43H180M0 69H180" />
-              <path d="M45 0V86M90 0V86M135 0V86" />
-            </g>
-            <path
-              className={styles.rewardArea}
-              d="M0 74C15 69 22 76 34 63C46 50 54 61 66 49C78 38 87 53 100 36C115 18 128 34 141 22C154 10 165 21 180 7V86H0Z"
-            />
-            <path
-              className={styles.rewardLine}
-              d="M0 74C15 69 22 76 34 63C46 50 54 61 66 49C78 38 87 53 100 36C115 18 128 34 141 22C154 10 165 21 180 7"
-            />
-          </svg>
-
-          <div className={styles.policyNetwork}>
-            <div className={styles.policyNetworkHeading}>
-              <span>ACTOR-CRITIC</span>
-              <b>CONF 0.96</b>
+          <aside className={styles.robotSignal}>
+            <div className={styles.robotSignalHeading}>
+              <span>REWARD / ROLLOUT</span>
+              <strong>+0.84</strong>
             </div>
-            <svg viewBox="0 0 160 100" preserveAspectRatio="none">
-              <g className={styles.networkLinks}>
-                <path d="M20 20L66 16M20 20L66 43M20 48L66 16M20 48L66 43M20 48L66 72M20 78L66 43M20 78L66 72M76 16L126 30M76 43L126 30M76 43L126 64M76 72L126 64" />
-              </g>
-              <g className={styles.networkInput}>
-                <circle cx="20" cy="20" r="5" />
-                <circle cx="20" cy="48" r="5" />
-                <circle cx="20" cy="78" r="5" />
-              </g>
-              <g className={styles.networkLatent}>
-                <circle cx="72" cy="16" r="6" />
-                <circle cx="72" cy="43" r="6" />
-                <circle cx="72" cy="72" r="6" />
-              </g>
-              <g className={styles.networkOutput}>
-                <circle cx="132" cy="30" r="7" />
-                <circle cx="132" cy="64" r="7" />
-              </g>
+            <svg viewBox="0 0 150 54" preserveAspectRatio="none">
+              <path className={styles.robotSignalGrid} d="M0 17H150M0 35H150" />
+              <path
+                className={styles.robotSignalLine}
+                d="M0 45C13 43 17 47 28 38C40 27 47 36 57 28C69 19 75 29 86 18C97 8 107 18 118 11C130 4 139 9 150 2"
+              />
             </svg>
-            <div className={styles.policyNetworkLegend}>
+            <div className={styles.robotPolicyFlow}>
               <span>STATE</span>
-              <span>LATENT</span>
+              <i />
+              <span>POLICY</span>
+              <i />
               <span>ACTION</span>
             </div>
-          </div>
+          </aside>
 
-          <div className={styles.signalFlow}>
-            <span>OBSERVATION</span>
-            <i />
-            <span>POLICY</span>
-            <i />
-            <span>ACTION</span>
+          <div className={styles.robotStageFooter}>
+            <span>03 AXES / CONTINUOUS CONTROL</span>
+            <span>TARGET LOCKED</span>
           </div>
-
-          <div className={styles.policyGrid}>
-            <span>JOINT STATE</span>
-            <b>ENCODED</b>
-            <span>TARGET DELTA</span>
-            <b>TRACKED</b>
-            <span>POLICY UPDATE</span>
-            <b>ITERATING</b>
-          </div>
-        </aside>
+        </div>
       </div>
     </figure>
   );

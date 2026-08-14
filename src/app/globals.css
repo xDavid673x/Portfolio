@@ -714,7 +714,7 @@ button:hover .arrow-icon--back {
   grid-column: span 7;
   grid-row: span 2;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
 }
 
 .bento-card--side {
@@ -736,9 +736,9 @@ button:hover .arrow-icon--back {
 }
 
 .bento-card--lead.bento-card--violet {
-  border-color: rgba(121, 87, 255, 0.62);
-  background: #090b09;
-  box-shadow: 0 2rem 5rem rgba(69, 46, 154, 0.18);
+  border-color: rgba(8, 9, 8, 0.18);
+  background: #d8d1ff;
+  box-shadow: 0 2rem 5rem rgba(69, 46, 154, 0.12);
 }
 
 .bento-card__visual {
@@ -788,15 +788,15 @@ button:hover .arrow-icon--back {
 .bento-card--lead .bento-card__visual {
   position: relative;
   inset: auto;
-  grid-row: 2;
+  grid-row: 1;
   min-width: 0;
   min-height: 0;
-  border-top: 1px solid rgba(8, 9, 8, 0.16);
+  border-bottom: 1px solid rgba(8, 9, 8, 0.18);
 }
 
 .bento-card__copy--lead {
   display: grid;
-  grid-row: 1;
+  grid-row: 2;
   grid-template-columns: minmax(0, 0.82fr) minmax(18rem, 1.18fr);
   grid-template-rows: auto minmax(0, 1fr) auto;
   column-gap: clamp(2rem, 4vw, 4rem);
