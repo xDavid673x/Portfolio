@@ -55,6 +55,17 @@ export function RoboticArmVisual({ className }: { className?: string }) {
               <path d="M48 24V208M95 24V208M142 24V208M189 24V208M236 24V208M283 24V208" />
             </g>
 
+            <g className={styles.reachEnvelope}>
+              <ellipse cx="155" cy="133" rx="111" ry="61" transform="rotate(-24 155 133)" />
+              <path d="M88 180C119 155 144 127 183 112C211 101 231 80 250 57" />
+              <path d="M88 180C112 166 128 149 151 141C187 128 210 98 250 57" />
+            </g>
+
+            <g className={styles.armGhost}>
+              <path d="M88 174L116 142L168 124L213 85" />
+              <path d="M88 174L108 134L157 103L224 70" />
+            </g>
+
             <path
               className={styles.trajectoryGhost}
               d="M88 180C105 150 116 119 155 109C196 98 211 71 247 60"
@@ -121,6 +132,37 @@ export function RoboticArmVisual({ className }: { className?: string }) {
               d="M0 74C15 69 22 76 34 63C46 50 54 61 66 49C78 38 87 53 100 36C115 18 128 34 141 22C154 10 165 21 180 7"
             />
           </svg>
+
+          <div className={styles.policyNetwork}>
+            <div className={styles.policyNetworkHeading}>
+              <span>ACTOR-CRITIC</span>
+              <b>CONF 0.96</b>
+            </div>
+            <svg viewBox="0 0 160 100" preserveAspectRatio="none">
+              <g className={styles.networkLinks}>
+                <path d="M20 20L66 16M20 20L66 43M20 48L66 16M20 48L66 43M20 48L66 72M20 78L66 43M20 78L66 72M76 16L126 30M76 43L126 30M76 43L126 64M76 72L126 64" />
+              </g>
+              <g className={styles.networkInput}>
+                <circle cx="20" cy="20" r="5" />
+                <circle cx="20" cy="48" r="5" />
+                <circle cx="20" cy="78" r="5" />
+              </g>
+              <g className={styles.networkLatent}>
+                <circle cx="72" cy="16" r="6" />
+                <circle cx="72" cy="43" r="6" />
+                <circle cx="72" cy="72" r="6" />
+              </g>
+              <g className={styles.networkOutput}>
+                <circle cx="132" cy="30" r="7" />
+                <circle cx="132" cy="64" r="7" />
+              </g>
+            </svg>
+            <div className={styles.policyNetworkLegend}>
+              <span>STATE</span>
+              <span>LATENT</span>
+              <span>ACTION</span>
+            </div>
+          </div>
 
           <div className={styles.signalFlow}>
             <span>OBSERVATION</span>
