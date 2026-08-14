@@ -20,15 +20,17 @@ import styles from "./HeroScene.module.css";
 import {
   ROBOT_PICKUP_PROGRESS,
   ROBOT_PLACE_PROGRESS,
-  ZeroRoboticArmModel,
-} from "./zero-robotic-arm-model";
+} from "./robotic-arm-kinematics";
+import { ZeroRoboticArmModel } from "./zero-robotic-arm-model";
 
 const ACCENT = "#b8ff4f";
 const ACCENT_SOFT = "#77d9c4";
 const WORKPIECE = "#f0b96b";
 
-const INPUT_STATION_POSITION: [number, number, number] = [-2.2, -1.62, 0.9];
+const INPUT_STATION_POSITION: [number, number, number] = [-2.3, -1.62, 0.9];
 const OUTPUT_STATION_POSITION: [number, number, number] = [2.2, -1.62, 0.72];
+const INPUT_WORKPIECE_POSITION: [number, number, number] = [-2.3, -1.36, 0.9];
+const OUTPUT_WORKPIECE_POSITION: [number, number, number] = [2.2, -1.36, 0.72];
 const PICK_AND_PLACE_CYCLE_SECONDS = 10;
 
 export type HeroSceneProps = {
@@ -290,14 +292,14 @@ function PickAndPlaceCell({
   return (
     <group>
       <Station accent={ACCENT_SOFT} position={INPUT_STATION_POSITION} />
-      <group ref={inputWorkpiece} position={[-2.2, -1.36, 0.9]}>
+      <group ref={inputWorkpiece} position={INPUT_WORKPIECE_POSITION}>
         <Workpiece />
       </group>
 
       <Station accent={ACCENT} position={OUTPUT_STATION_POSITION} />
       <group
         ref={outputWorkpiece}
-        position={[2.2, -1.36, 0.72]}
+        position={OUTPUT_WORKPIECE_POSITION}
         visible={false}
       >
         <Workpiece />
@@ -404,8 +406,10 @@ function Scene({
         <Suspense fallback={null}>
           <ZeroRoboticArmModel
             heldWorkpiece={<Workpiece scale={0.1} />}
-            modelScale={scale < 0.8 ? 12 : 10}
-            position={[0.1, -1.72, 0]}
+            modelScale={10}
+            pickupTarget={INPUT_WORKPIECE_POSITION}
+            placeTarget={OUTPUT_WORKPIECE_POSITION}
+            position={[0.1, -1.72, -1.2]}
             reducedMotion={reducedMotion}
             rotation={[0, -0.42, 0]}
             scrollProgressRef={workCycleRef}

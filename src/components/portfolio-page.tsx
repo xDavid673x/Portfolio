@@ -81,6 +81,7 @@ const marqueeItems = [
   "Full-stack engineering",
   "Human-centred software",
 ];
+const MARQUEE_GROUP_COUNT = 5;
 
 function ArrowIcon({ direction = "forward" }: { direction?: "forward" | "back" }) {
   return (
@@ -132,7 +133,7 @@ export function PortfolioPage() {
             .from(".hero-visual", { scale: 0.9, opacity: 0, duration: 1.1 }, "-=0.9");
 
           gsap.to(".marquee-track", {
-            xPercent: -50,
+            xPercent: -100 / MARQUEE_GROUP_COUNT,
             duration: 28,
             repeat: -1,
             ease: "none",
@@ -300,8 +301,8 @@ export function PortfolioPage() {
 
       <div className="marquee" aria-label="Areas of focus">
         <div className="marquee-track">
-          {[0, 1].map((group) => (
-            <div className="marquee-group" key={group} aria-hidden={group === 1}>
+          {Array.from({ length: MARQUEE_GROUP_COUNT }, (_, group) => (
+            <div className="marquee-group" key={group} aria-hidden={group > 0}>
               {marqueeItems.map((item) => (
                 <span key={`${group}-${item}`}>
                   {item}

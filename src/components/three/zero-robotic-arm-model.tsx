@@ -12,6 +12,15 @@ import {
 } from "react";
 import * as THREE from "three";
 
+import {
+  interpolateCatmullRom,
+  sampleRobotCycle,
+  solveCcdIk,
+  type RobotCyclePosture,
+  type RobotCycleSample,
+  type RobotCycleTargets,
+} from "./robotic-arm-kinematics";
+
 export const ZERO_ROBOTIC_ARM_MODEL_URL =
   "/models/zero-robotic-arm/zero-robotic-arm.glb";
 
@@ -35,25 +44,28 @@ const HOME_POSE: Record<JointName, number> = {
   joint6_axis: 0.12,
 };
 
-const PICK_AND_PLACE_POSES: Array<Record<JointName, number>> = [
-  HOME_POSE,
-  {
-    joint1_axis: -0.899,
-    joint2_axis: 0.874,
-    joint3_axis: 0.728,
-    joint4_axis: 0.39,
-    joint5_axis: -0.13,
-    joint6_axis: 0.324,
+const IK_JOINT_LIMITS = [
+  [-Math.PI, Math.PI],
+  [-2.85, 1.45],
+  [-2.45, 2.45],
+  [-2.85, 2.85],
+  [-2.85, 2.85],
+] as const;
+
+const PREFERRED_CYCLE_POSES: Record<
+  RobotCyclePosture,
+  Record<JointName, number>
+> = {
+  home: HOME_POSE,
+  "pickup-rear": {
+    joint1_axis: -0.82,
+    joint2_axis: 0.2,
+    joint3_axis: 1.06,
+    joint4_axis: 0.98,
+    joint5_axis: -0.42,
+    joint6_axis: 0.36,
   },
-  {
-    joint1_axis: -0.986,
-    joint2_axis: 1.062,
-    joint3_axis: 0.883,
-    joint4_axis: 0.722,
-    joint5_axis: -0.296,
-    joint6_axis: 0.334,
-  },
-  {
+  "pickup-above": {
     joint1_axis: -0.92,
     joint2_axis: 0.42,
     joint3_axis: 0.93,
@@ -61,7 +73,15 @@ const PICK_AND_PLACE_POSES: Array<Record<JointName, number>> = [
     joint5_axis: -0.36,
     joint6_axis: 0.37,
   },
-  {
+  pickup: {
+    joint1_axis: -0.986,
+    joint2_axis: 1.062,
+    joint3_axis: 0.883,
+    joint4_axis: 0.722,
+    joint5_axis: -0.296,
+    joint6_axis: 0.334,
+  },
+  transit: {
     joint1_axis: 0.16,
     joint2_axis: 0.4,
     joint3_axis: 0.93,
@@ -69,7 +89,7 @@ const PICK_AND_PLACE_POSES: Array<Record<JointName, number>> = [
     joint5_axis: -0.19,
     joint6_axis: 0.1,
   },
-  {
+  "place-above": {
     joint1_axis: 1.24,
     joint2_axis: 0.7,
     joint3_axis: 1.08,
@@ -77,7 +97,7 @@ const PICK_AND_PLACE_POSES: Array<Record<JointName, number>> = [
     joint5_axis: 0.12,
     joint6_axis: -0.28,
   },
-  {
+  place: {
     joint1_axis: 1.31,
     joint2_axis: 1.18,
     joint3_axis: 1.22,
@@ -85,13 +105,7 @@ const PICK_AND_PLACE_POSES: Array<Record<JointName, number>> = [
     joint5_axis: -0.09,
     joint6_axis: -0.21,
   },
-  HOME_POSE,
-];
-
-export const ROBOT_PICKUP_PROGRESS =
-  2 / (PICK_AND_PLACE_POSES.length - 1);
-export const ROBOT_PLACE_PROGRESS =
-  6 / (PICK_AND_PLACE_POSES.length - 1);
+};
 
 export type ZeroRoboticArmModelProps = Omit<
   ThreeElements["group"],
@@ -111,6 +125,10 @@ export type ZeroRoboticArmModelProps = Omit<
   modelScale?: number;
   /** Maximum pointer contribution to the articulated pose, in radians. */
   pointerInfluence?: number;
+  /** Pickup target in the arm parent's coordinate system. */
+  pickupTarget?: [number, number, number];
+  /** Placement target in the arm parent's coordinate system. */
+  placeTarget?: [number, number, number];
   /** Optional normalized workcell-cycle progress used to drive the pick-and-place cycle. */
   scrollProgressRef?: RefObject<number>;
 };
@@ -131,14 +149,43 @@ export function ZeroRoboticArmModel({
   heldWorkpiece,
   modelScale = 10,
   pointerInfluence = 0.1,
+  pickupTarget = [-2.2, -1.36, 0.9],
+  placeTarget = [2.2, -1.36, 0.72],
   reducedMotion = false,
   scrollProgressRef,
   ...groupProps
 }: ZeroRoboticArmModelProps) {
   const { scene } = useGLTF(ZERO_ROBOTIC_ARM_MODEL_URL);
   const carriedWorkpiece = useRef<THREE.Group>(null);
+  const gripper = useRef<THREE.Group>(null);
+  const leftFinger = useRef<THREE.Mesh>(null);
   const presentation = useRef<THREE.Group>(null);
+  const rightFinger = useRef<THREE.Mesh>(null);
+  const root = useRef<THREE.Group>(null);
+  const toolCenter = useRef<THREE.Group>(null);
   const joints = useRef<JointMap>({});
+  const ikJoints = useRef<THREE.Object3D[]>([]);
+  const homeTargetReady = useRef(false);
+  const homeTarget = useRef(new THREE.Vector3());
+  const targetWorld = useRef(new THREE.Vector3());
+  const gripperParentWorld = useRef(new THREE.Quaternion());
+  const cycleTargets = useRef<RobotCycleTargets>({
+    home: new THREE.Vector3(),
+    pickup: new THREE.Vector3(...pickupTarget),
+    place: new THREE.Vector3(...placeTarget),
+  });
+  const cycleSample = useRef<RobotCycleSample>({
+    carrying: false,
+    grip: 0,
+    postureEnd: "home",
+    postureNext: "home",
+    posturePrevious: "home",
+    postureProgress: 0,
+    postureStart: "home",
+    target: new THREE.Vector3(),
+  });
+  const currentJointRotations = useRef(new Float32Array(JOINT_NAMES.length));
+  const solvedJointRotations = useRef(new Float32Array(JOINT_NAMES.length));
 
   const materials = useMemo(() => {
     const body = new THREE.MeshPhysicalMaterial({
@@ -215,12 +262,23 @@ export function ZeroRoboticArmModel({
       if (joint) resolvedJoints[name] = joint;
     }
     joints.current = resolvedJoints;
+    ikJoints.current = JOINT_NAMES.slice(0, 5).flatMap((name) => {
+      const joint = resolvedJoints[name];
+      return joint ? [joint] : [];
+    });
     setJointPose(joints.current, HOME_POSE);
+    homeTargetReady.current = false;
 
     return () => {
       joints.current = {};
+      ikJoints.current = [];
     };
   }, [model]);
+
+  useEffect(() => {
+    cycleTargets.current.pickup.set(...pickupTarget);
+    cycleTargets.current.place.set(...placeTarget);
+  }, [pickupTarget, placeTarget]);
 
   useLayoutEffect(() => {
     setJointPose(joints.current, HOME_POSE);
@@ -232,99 +290,177 @@ export function ZeroRoboticArmModel({
 
   useFrame((state, delta) => {
     const scrollProgress = scrollProgressRef?.current;
-    if (carriedWorkpiece.current) {
-      carriedWorkpiece.current.visible =
-        animate &&
-        !reducedMotion &&
-        scrollProgress !== undefined &&
-        scrollProgress >= ROBOT_PICKUP_PROGRESS &&
-        scrollProgress < ROBOT_PLACE_PROGRESS;
+    const armRoot = root.current;
+
+    const alignGripper = () => {
+      if (!gripper.current?.parent) return;
+      gripper.current.parent.getWorldQuaternion(gripperParentWorld.current);
+      gripper.current.quaternion.copy(gripperParentWorld.current).invert();
+    };
+
+    if (
+      !homeTargetReady.current &&
+      armRoot?.parent &&
+      toolCenter.current
+    ) {
+      alignGripper();
+      armRoot.updateWorldMatrix(true, true);
+      toolCenter.current.getWorldPosition(homeTarget.current);
+      armRoot.parent.worldToLocal(homeTarget.current);
+      cycleTargets.current.home.copy(homeTarget.current);
+      homeTargetReady.current = true;
     }
 
-    if (!animate || reducedMotion) return;
+    if (!animate || reducedMotion) {
+      if (carriedWorkpiece.current) carriedWorkpiece.current.visible = false;
+      if (leftFinger.current) leftFinger.current.position.x = -0.036;
+      if (rightFinger.current) rightFinger.current.position.x = 0.036;
+      alignGripper();
+      return;
+    }
 
-    const time = state.clock.getElapsedTime();
+    if (scrollProgress === undefined) {
+      if (carriedWorkpiece.current) carriedWorkpiece.current.visible = false;
+      if (leftFinger.current) leftFinger.current.position.x = -0.036;
+      if (rightFinger.current) rightFinger.current.position.x = 0.036;
+      const time = state.clock.getElapsedTime();
+      const dampingDelta = Math.min(delta, 0.05);
+      const pointerX = state.pointer.x * pointerInfluence;
+      const pointerY = state.pointer.y * pointerInfluence;
+      const targets: Record<JointName, number> = {
+        joint1_axis:
+          HOME_POSE.joint1_axis + pointerX + Math.sin(time * 0.42) * 0.05,
+        joint2_axis:
+          HOME_POSE.joint2_axis +
+          pointerY * 0.55 +
+          Math.sin(time * 0.51 + 0.8) * 0.035,
+        joint3_axis:
+          HOME_POSE.joint3_axis -
+          pointerY * 0.32 +
+          Math.sin(time * 0.46 + 1.7) * 0.04,
+        joint4_axis:
+          HOME_POSE.joint4_axis -
+          pointerX * 0.42 +
+          Math.sin(time * 0.58 + 2.1) * 0.045,
+        joint5_axis:
+          HOME_POSE.joint5_axis +
+          pointerY * 0.4 +
+          Math.sin(time * 0.48 + 2.9) * 0.03,
+        joint6_axis:
+          HOME_POSE.joint6_axis + Math.sin(time * 0.67) * 0.06,
+      };
+
+      for (const name of JOINT_NAMES) {
+        const joint = joints.current[name];
+        if (!joint) continue;
+        joint.rotation.z = THREE.MathUtils.damp(
+          joint.rotation.z,
+          targets[name],
+          4.1,
+          dampingDelta,
+        );
+      }
+      alignGripper();
+      return;
+    }
+
+    const sample = sampleRobotCycle(
+      scrollProgress,
+      cycleTargets.current,
+      cycleSample.current,
+    );
+    if (carriedWorkpiece.current) {
+      carriedWorkpiece.current.visible = sample.carrying;
+    }
+    const fingerPosition = THREE.MathUtils.lerp(0.036, 0.0215, sample.grip);
+    if (leftFinger.current) leftFinger.current.position.x = -fingerPosition;
+    if (rightFinger.current) rightFinger.current.position.x = fingerPosition;
+
+    const previousPose = PREFERRED_CYCLE_POSES[sample.posturePrevious];
+    const startPose = PREFERRED_CYCLE_POSES[sample.postureStart];
+    const endPose = PREFERRED_CYCLE_POSES[sample.postureEnd];
+    const nextPose = PREFERRED_CYCLE_POSES[sample.postureNext];
     const dampingDelta = Math.min(delta, 0.05);
-    const pointerX = state.pointer.x * pointerInfluence;
-    const pointerY = state.pointer.y * pointerInfluence;
-    const targets: Record<JointName, number> = scrollProgress === undefined
-      ? {
-          joint1_axis: HOME_POSE.joint1_axis + pointerX + Math.sin(time * 0.42) * 0.05,
-          joint2_axis: HOME_POSE.joint2_axis + pointerY * 0.55 + Math.sin(time * 0.51 + 0.8) * 0.035,
-          joint3_axis: HOME_POSE.joint3_axis - pointerY * 0.32 + Math.sin(time * 0.46 + 1.7) * 0.04,
-          joint4_axis: HOME_POSE.joint4_axis - pointerX * 0.42 + Math.sin(time * 0.58 + 2.1) * 0.045,
-          joint5_axis: HOME_POSE.joint5_axis + pointerY * 0.4 + Math.sin(time * 0.48 + 2.9) * 0.03,
-          joint6_axis: HOME_POSE.joint6_axis + Math.sin(time * 0.67) * 0.06,
-        }
-      : (() => {
-          const scaled =
-            THREE.MathUtils.clamp(scrollProgress, 0, 0.9999) *
-            (PICK_AND_PLACE_POSES.length - 1);
-          const poseIndex = Math.floor(scaled);
-          const nextPoseIndex = Math.min(
-            poseIndex + 1,
-            PICK_AND_PLACE_POSES.length - 1,
-          );
-          const localProgress = THREE.MathUtils.smoothstep(
-            scaled - poseIndex,
-            0,
-            1,
-          );
-          const pose = {} as Record<JointName, number>;
-
-          for (const name of JOINT_NAMES) {
-            pose[name] = THREE.MathUtils.lerp(
-              PICK_AND_PLACE_POSES[poseIndex][name],
-              PICK_AND_PLACE_POSES[nextPoseIndex][name],
-              localProgress,
-            );
-          }
-
-          return pose;
-        })();
-
-    for (const name of JOINT_NAMES) {
+    for (const [index, name] of JOINT_NAMES.entries()) {
       const joint = joints.current[name];
       if (!joint) continue;
+      currentJointRotations.current[index] = joint.rotation.z;
+      const preferredRotation = interpolateCatmullRom(
+        previousPose[name],
+        startPose[name],
+        endPose[name],
+        nextPose[name],
+        sample.postureProgress,
+      );
       joint.rotation.z = THREE.MathUtils.damp(
         joint.rotation.z,
-        targets[name],
-        4.1,
+        preferredRotation,
+        7.5,
         dampingDelta,
       );
     }
 
-    if (presentation.current) {
-      presentation.current.rotation.y = THREE.MathUtils.damp(
-        presentation.current.rotation.y,
-        scrollProgress === undefined ? state.pointer.x * 0.055 : 0,
-        3.2,
-        dampingDelta,
-      );
-      presentation.current.rotation.x = THREE.MathUtils.damp(
-        presentation.current.rotation.x,
-        scrollProgress === undefined ? -state.pointer.y * 0.025 : 0,
-        3.2,
-        dampingDelta,
-      );
-      presentation.current.position.y =
-        scrollProgress === undefined ? Math.sin(time * 0.38) * 0.012 : 0;
+    if (armRoot?.parent && toolCenter.current) {
+      targetWorld.current.copy(sample.target);
+      armRoot.parent.localToWorld(targetWorld.current);
+      solveCcdIk({
+        beforeSample: alignGripper,
+        iterations: 6,
+        jointLimits: IK_JOINT_LIMITS,
+        joints: ikJoints.current,
+        root: armRoot,
+        stepLimit: 0.14,
+        targetWorld: targetWorld.current,
+        toolCenter: toolCenter.current,
+      });
     }
+
+    for (const [index, name] of JOINT_NAMES.entries()) {
+      const joint = joints.current[name];
+      if (!joint) continue;
+      solvedJointRotations.current[index] = joint.rotation.z;
+      joint.rotation.z = THREE.MathUtils.damp(
+        currentJointRotations.current[index],
+        solvedJointRotations.current[index],
+        16,
+        dampingDelta,
+      );
+    }
+    alignGripper();
   });
 
   return (
-    <group {...groupProps}>
+    <group ref={root} {...groupProps}>
       <group ref={presentation}>
         <group rotation={[-Math.PI / 2, 0, 0]} scale={modelScale}>
           <primitive object={model} />
-          {heldWorkpiece && endEffector
+          {endEffector
             ? createPortal(
-                <group
-                  ref={carriedWorkpiece}
-                  position={[0, 0, -0.045]}
-                  visible={false}
-                >
-                  {heldWorkpiece}
+                <group ref={gripper}>
+                  <mesh position={[0, -0.008, 0]} material={materials.accent}>
+                    <boxGeometry args={[0.085, 0.02, 0.055]} />
+                  </mesh>
+                  <mesh
+                    ref={leftFinger}
+                    position={[-0.036, -0.047, 0]}
+                    material={materials.hardware}
+                  >
+                    <boxGeometry args={[0.011, 0.074, 0.026]} />
+                  </mesh>
+                  <mesh
+                    ref={rightFinger}
+                    position={[0.036, -0.047, 0]}
+                    material={materials.hardware}
+                  >
+                    <boxGeometry args={[0.011, 0.074, 0.026]} />
+                  </mesh>
+                  <group ref={toolCenter} position={[0, -0.052, 0]}>
+                    {heldWorkpiece ? (
+                      <group ref={carriedWorkpiece} visible={false}>
+                        {heldWorkpiece}
+                      </group>
+                    ) : null}
+                  </group>
                 </group>,
                 endEffector,
               )

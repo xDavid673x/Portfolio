@@ -586,11 +586,13 @@ button:hover .arrow-icon--back {
 .marquee-track {
   display: flex;
   width: max-content;
+  transform: translate3d(0, 0, 0);
   will-change: transform;
 }
 
 .marquee-group {
   display: flex;
+  width: max-content;
   flex-shrink: 0;
   align-items: center;
   padding: 1.2rem 0;
@@ -2067,7 +2069,7 @@ button:hover .arrow-icon--back {
     transform: none !important;
   }
 
-  .marquee-group:nth-child(2) {
+  .marquee-group:nth-child(n + 2) {
     display: none;
   }
 }
