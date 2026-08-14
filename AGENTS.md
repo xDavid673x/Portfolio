@@ -12,6 +12,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 > Whatever action you can do yourself, Please do yourself, this includes starting apps and verification.
 > Do not use the Sites skill for design or implementation in this repository.
+> After every completed implementation step, create a local git commit containing only that step's changes.
 
 ## Project Structure & Module Organization
 
