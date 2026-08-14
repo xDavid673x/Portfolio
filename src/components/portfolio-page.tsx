@@ -336,7 +336,12 @@ export function PortfolioPage() {
               <div className="bento-card__visual group-hover:scale-105 transition-transform duration-700 ease-out">
                 <ProjectVisualPanel type={project.visual} />
               </div>
-              <div className="bento-card__copy">
+              <div className={`bento-card__copy${index === 0 ? " bento-card__copy--lead" : ""}`}>
+                {index === 0 ? (
+                  <span className="bento-card__discipline">
+                    Reinforcement learning / robotics
+                  </span>
+                ) : null}
                 <h3>{project.shortTitle}</h3>
                 <p>{project.summary}</p>
                 <span className="text-link">
