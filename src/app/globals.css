@@ -742,11 +742,22 @@ button:hover .arrow-icon--back {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 0.45rem;
+  background: rgba(8, 9, 8, 0.86);
+  box-shadow: 0 0.6rem 1.5rem rgba(8, 9, 8, 0.18);
+  color: rgba(255, 255, 255, 0.88);
   font-family: var(--font-geist-mono), monospace;
   font-size: 0.68rem;
   font-weight: 640;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+  backdrop-filter: blur(12px);
+}
+
+.bento-card__topline span:last-child {
+  color: rgba(255, 255, 255, 0.62);
 }
 
 .bento-card__visual {
