@@ -33,7 +33,7 @@ export function RoboticArmVisual({ className }: { className?: string }) {
       aria-label="Reinforcement-learning workspace showing a robotic arm, its sampled trajectory, a goal position, and an abstract reward signal."
     >
       <div className={styles.technicalHeader} aria-hidden="true">
-        <span>DEVELOPING</span>
+        <span></span>
         <span className={styles.headerState}>
           <i /> SIMULATION
         </span>
