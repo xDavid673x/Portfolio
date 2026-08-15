@@ -336,10 +336,6 @@ export function PortfolioPage() {
           <h2>
             From shipped software to systems that <em>learn.</em>
           </h2>
-          <span>
-            Three projects, ordered by where I am heading rather than when I
-            started.
-          </span>
         </header>
 
         <div className="project-bento grid-flow-dense section-reveal">
