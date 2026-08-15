@@ -357,11 +357,9 @@ export function PortfolioPage() {
                 <ProjectVisualPanel type={project.visual} />
               </div>
               <div className={`bento-card__copy${index === 0 ? " bento-card__copy--lead" : ""}`}>
-                {index === 0 ? (
-                  <span className="bento-card__discipline">
-                    Reinforcement learning / robotics
-                  </span>
-                ) : null}
+                <span className="bento-card__discipline">
+                  {index === 0 ? "Reinforcement learning / robotics" : project.context}
+                </span>
                 <h3>{project.shortTitle}</h3>
                 <p>{project.summary}</p>
                 <span className="text-link">

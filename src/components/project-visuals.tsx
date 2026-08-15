@@ -254,9 +254,9 @@ export function FormulaAutonomyVisual({ className }: { className?: string }) {
       aria-label="Formula Student autonomy display showing perception boundaries, a predicted driving corridor, and the perception, planning, and control pipeline."
     >
       <div className={styles.technicalHeader} aria-hidden="true">
-        <span>AUTONOMY PIPELINE</span>
+        <span>FORMULA STUDENT / AUTONOMY</span>
         <span className={styles.headerState}>
-          <i /> SENSOR FUSION
+          <i /> PIPELINE ONLINE
         </span>
       </div>
 
@@ -329,6 +329,17 @@ export function FormulaAutonomyVisual({ className }: { className?: string }) {
             <span>INPUT TO ACTUATION</span>
           </div>
 
+          <div className={styles.modelReadout}>
+            <div>
+              <span>AI / ML POLICY</span>
+              <strong>ACTOR-CRITIC</strong>
+            </div>
+            <div className={styles.modelMetrics}>
+              <span>CONF <b>0.96</b></span>
+              <span>LAT <b>18ms</b></span>
+            </div>
+          </div>
+
           <div className={styles.pipelineBands}>
             {telemetryBands.map((band, index) => (
               <div className={styles.pipelineBand} key={band}>
@@ -368,55 +379,53 @@ export function FitnessPlatformVisual({ className }: { className?: string }) {
     <figure
       className={joinClassNames(styles.visual, styles.fitnessVisual, className)}
       role="img"
-      aria-label="Editorial visualization of verified fitness-platform features: workout tracking, leaderboards, data-aware coaching, and social activity."
+      aria-label="Motiv8 homepage hero visual showing the shipped fitness platform, its brand mark, and connected workout, social, and coaching features."
     >
-      <div className={styles.fitnessBrowser} aria-hidden="true">
-        <div className={styles.browserBar}>
-          <span className={styles.browserDots}><i /><i /><i /></span>
-          <span className={styles.browserAddress}>FITNESS PLATFORM</span>
-          <span className={styles.browserMenu}><i /><i /></span>
-        </div>
+      <div className={styles.technicalHeader} aria-hidden="true">
+        <span>MOTIV8 / FULL-STACK PLATFORM</span>
+        <span className={styles.headerState}>
+          <i /> SHIPPED / VERIFIED
+        </span>
+      </div>
 
-        <div className={styles.fitnessMosaic}>
-          <div className={styles.fitnessHeroTile}>
-            <div className={styles.fitnessPhoto} />
-            <div className={styles.fitnessPhotoWash} />
-            <div className={styles.fitnessHeroCopy}>
-              <span>WORKOUT TRACKING</span>
-              <strong>Movement, logged<br />with evidence.</strong>
-              <i>Build a workout</i>
-            </div>
+      <div className={styles.fitnessLayout} aria-hidden="true">
+        <div className={styles.fitnessStage}>
+          <div className={styles.fitnessPhoto} />
+          <div className={styles.fitnessPhotoWash} />
+          <div className={styles.fitnessBrandLockup}>
+            <span className={styles.fitnessLogo} />
+            <span>TEAM PROJECT / 2025</span>
           </div>
-
-          <div className={styles.scheduleTile}>
-            <div className={styles.tileHeading}>
-              <span>LEADERBOARDS</span>
-              <i />
-            </div>
-            <div className={styles.scheduleRows}>
-              <div><b>Weekly</b><span>Progress</span><i /></div>
-              <div><b>Friends</b><span>Social</span><i /></div>
-              <div><b>Global</b><span>Scored</span><i /></div>
-            </div>
+          <div className={styles.fitnessHeroCopy}>
+            <span>TRAIN SMARTER / STAY CONSISTENT</span>
+            <strong>Where motivation<br />turns into results</strong>
+            <i>Homepage hero / shipped</i>
           </div>
-
-          <div className={styles.membershipTile}>
-            <span>AI COACH</span>
-            <strong>Context from<br />your training.</strong>
-            <div className={styles.membershipLines}>
-              <i /><i /><i />
-            </div>
-          </div>
-
-          <div className={styles.accountTile}>
-            <div className={styles.accountMark}>F</div>
-            <div>
-              <span>SOCIAL FEED</span>
-              <strong>Track. Share. Improve.</strong>
-            </div>
-            <i className={styles.accountArrow} />
+          <div className={styles.fitnessStageFooter}>
+            <span>WORKOUTS / SOCIAL / COACHING</span>
+            <span>HERO VERIFIED</span>
           </div>
         </div>
+
+        <aside className={styles.fitnessSignal}>
+          <div className={styles.fitnessSignalHeading}>
+            <span>PRODUCT SURFACE</span>
+            <strong>04 MODULES</strong>
+          </div>
+          <div className={styles.fitnessFeatureList}>
+            <div><span>01</span><b>WORKOUTS</b><i /></div>
+            <div><span>02</span><b>LEADERBOARDS</b><i /></div>
+            <div><span>03</span><b>GYM LOCATOR</b><i /></div>
+            <div><span>04</span><b>AI COACHING</b><i /></div>
+          </div>
+          <div className={styles.fitnessSignalChart}>
+            <span>CONNECTED JOURNEY</span>
+            <svg viewBox="0 0 150 46" preserveAspectRatio="none">
+              <path d="M0 34H150M0 18H150" />
+              <path d="M0 37C14 35 18 24 31 27C46 31 49 11 64 16C80 22 83 28 96 20C111 11 118 18 128 10C138 4 144 7 150 3" />
+            </svg>
+          </div>
+        </aside>
       </div>
     </figure>
   );

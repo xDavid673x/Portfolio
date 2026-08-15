@@ -753,12 +753,60 @@
 }
 
 .autonomyVisual {
-  --accent: #ff5b35;
-  --accent-rgb: 255, 91, 53;
+  --accent: #668397;
+  --accent-rgb: 102, 131, 151;
+  --autonomy-coral: #f07a52;
+  --autonomy-paper: #d9e2e6;
+  --autonomy-slate: #2b3a43;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
   background:
-    radial-gradient(circle at 14% 85%, rgba(0, 170, 255, 0.12), transparent 36%),
-    radial-gradient(circle at 82% 6%, rgba(255, 91, 53, 0.14), transparent 32%),
-    #090b0d;
+    radial-gradient(circle at 78% 14%, rgba(240, 122, 82, 0.12), transparent 30%),
+    radial-gradient(circle at 15% 88%, rgba(102, 131, 151, 0.18), transparent 38%),
+    #090b09;
+  box-shadow: none;
+  color: #e6edf0;
+}
+
+.autonomyVisual::before {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image:
+    linear-gradient(rgba(224, 235, 239, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(224, 235, 239, 0.07) 1px, transparent 1px);
+  background-size: clamp(2.5rem, 7vw, 4.25rem) clamp(2.5rem, 7vw, 4.25rem);
+  content: "";
+  mask-image: linear-gradient(to bottom, transparent 3%, black 30%, black 82%, transparent);
+  pointer-events: none;
+}
+
+.autonomyVisual .technicalHeader {
+  height: clamp(2.8rem, 10%, 3.4rem);
+  border-bottom-color: rgba(226, 237, 240, 0.16);
+  color: rgba(226, 237, 240, 0.62);
+}
+
+.autonomyVisual .headerState {
+  color: #e6edf0;
+}
+
+.autonomyVisual .headerState i {
+  background: var(--autonomy-coral);
+  box-shadow: none;
+}
+
+.autonomyLayout {
+  height: calc(100% - clamp(2.8rem, 10%, 3.4rem));
+}
+
+.autonomyVisual .trackViewport {
+  border-right-color: rgba(226, 237, 240, 0.16);
+}
+
+.autonomyVisual .trackGrid {
+  stroke: rgba(102, 131, 151, 0.22);
 }
 
 .viewportLabel {
@@ -776,21 +824,21 @@
 
 .trackEdge {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.2);
+  stroke: rgba(226, 237, 240, 0.3);
   stroke-width: 1;
   stroke-dasharray: 2 4;
 }
 
 .safeCorridor {
   fill: none;
-  stroke: rgba(var(--accent-rgb), 0.13);
+  stroke: rgba(240, 122, 82, 0.13);
   stroke-linecap: round;
   stroke-width: 24;
 }
 
 .plannedPath {
   fill: none;
-  stroke: var(--accent);
+  stroke: var(--autonomy-coral);
   stroke-linecap: round;
   stroke-width: 2;
   stroke-dasharray: 7 6;
@@ -798,26 +846,26 @@
 }
 
 .perceptionCone {
-  fill: rgba(63, 164, 255, 0.07);
-  stroke: rgba(63, 164, 255, 0.24);
+  fill: rgba(102, 131, 151, 0.09);
+  stroke: rgba(102, 131, 151, 0.35);
   stroke-width: 0.8;
 }
 
 .perceptionRay {
   fill: none;
-  stroke: rgba(63, 164, 255, 0.18);
+  stroke: rgba(102, 131, 151, 0.24);
   stroke-width: 0.7;
 }
 
 .boundaryPoints {
-  fill: #3ba6ff;
-  stroke: #0b1117;
+  fill: var(--autonomy-paper);
+  stroke: #10181e;
   stroke-width: 1.5;
 }
 
 .boundaryPoints > g:nth-child(even) > circle:first-child,
 .boundaryPoints > circle:nth-last-child(-n + 3) {
-  fill: var(--accent);
+  fill: var(--autonomy-coral);
 }
 
 .pointEcho {
@@ -828,8 +876,8 @@
 }
 
 .carMarker {
-  fill: #e9eef1;
-  stroke: #111518;
+  fill: var(--autonomy-paper);
+  stroke: #10181e;
   stroke-width: 1.4;
   filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.22));
 }
@@ -838,8 +886,8 @@
   width: 0.42rem;
   height: 0.42rem;
   border-radius: 50%;
-  background: #3ba6ff;
-  box-shadow: 0 0 0 2px rgba(59, 166, 255, 0.14);
+  background: var(--autonomy-paper);
+  box-shadow: 0 0 0 2px rgba(217, 226, 230, 0.14);
 }
 
 .pipelineBands {
@@ -931,92 +979,110 @@
 
 .steeringLine {
   fill: none;
-  stroke: var(--accent);
+  stroke: var(--autonomy-coral);
   stroke-width: 1.5;
   vector-effect: non-scaling-stroke;
 }
 
-.fitnessVisual {
-  aspect-ratio: 16 / 10;
-  padding: clamp(0.65rem, 1.8vw, 1.25rem);
-  border-color: rgba(34, 55, 42, 0.2);
-  background:
-    radial-gradient(circle at 75% 16%, rgba(177, 213, 164, 0.75), transparent 35%),
-    linear-gradient(145deg, #d8e0d2 0%, #aebead 48%, #738b78 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    0 32px 80px rgba(26, 45, 31, 0.25);
+.modelReadout {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding-block: 0.55rem 0.7rem;
+  border-bottom: 1px solid var(--line);
 }
 
-.fitnessBrowser {
+.modelReadout > div:first-child {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.22rem;
+}
+
+.modelReadout span,
+.modelMetrics span {
+  color: rgba(226, 237, 240, 0.42);
+  font-size: clamp(0.32rem, 0.5vw, 0.44rem);
+}
+
+.modelReadout strong {
+  overflow: hidden;
+  color: var(--autonomy-paper);
+  font-size: clamp(0.46rem, 0.72vw, 0.62rem);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.modelMetrics {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.5rem;
+}
+
+.modelMetrics b {
+  color: var(--autonomy-coral);
+  font-weight: 600;
+}
+
+.fitnessVisual {
+  --accent: #f07a52;
+  --accent-rgb: 240, 122, 82;
+  --fitness-paper: #d9e2e6;
+  --fitness-blue: #668397;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+  background:
+    radial-gradient(circle at 78% 14%, rgba(240, 122, 82, 0.12), transparent 30%),
+    radial-gradient(circle at 14% 88%, rgba(102, 131, 151, 0.18), transparent 38%),
+    #090b09;
+  box-shadow: none;
+  color: #e6edf0;
+}
+
+.fitnessVisual .technicalHeader {
+  height: clamp(2.8rem, 10%, 3.4rem);
+  border-bottom-color: rgba(226, 237, 240, 0.16);
+  color: rgba(226, 237, 240, 0.62);
+}
+
+.fitnessVisual .headerState {
+  color: #e6edf0;
+}
+
+.fitnessVisual .headerState i {
+  background: var(--accent);
+  box-shadow: none;
+}
+
+.fitnessLayout {
   position: relative;
   z-index: 2;
-  display: grid;
+  display: block;
+  height: calc(100% - clamp(2.8rem, 10%, 3.4rem));
+}
+
+.fitnessStage {
+  position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  grid-template-rows: clamp(2rem, 7%, 2.8rem) 1fr;
-  border: 1px solid rgba(17, 34, 22, 0.16);
-  border-radius: clamp(0.65rem, 1.3vw, 1.05rem);
-  background: #f1f0e8;
-  color: #132019;
-  box-shadow: 0 18px 45px rgba(23, 49, 29, 0.2);
 }
 
-.browserBar {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  padding-inline: clamp(0.6rem, 1.4vw, 1rem);
-  border-bottom: 1px solid rgba(17, 34, 22, 0.12);
-  background: rgba(248, 248, 241, 0.92);
-  font-size: clamp(0.38rem, 0.56vw, 0.5rem);
-}
-
-.browserDots {
-  display: flex;
-  gap: 0.24rem;
-}
-
-.browserDots i {
-  width: 0.38rem;
-  height: 0.38rem;
-  border-radius: 50%;
-  background: rgba(19, 32, 25, 0.18);
-}
-
-.browserAddress {
-  color: rgba(19, 32, 25, 0.56);
-}
-
-.browserMenu {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  align-items: flex-end;
-}
-
-.browserMenu i {
-  width: 1.05rem;
-  height: 1px;
-  background: rgba(19, 32, 25, 0.55);
-}
-
-.fitnessMosaic {
-  display: grid;
-  min-height: 0;
-  grid-template-columns: 1.45fr 0.55fr 0.92fr;
-  grid-template-rows: 1fr 0.56fr;
-  grid-auto-flow: dense;
-}
-
-.fitnessHeroTile {
-  position: relative;
-  min-width: 0;
-  overflow: hidden;
-  grid-row: span 2;
-  border-right: 1px solid rgba(17, 34, 22, 0.14);
-  color: #f4f2e9;
+.fitnessStage::before {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image:
+    linear-gradient(rgba(224, 235, 239, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(224, 235, 239, 0.06) 1px, transparent 1px);
+  background-size: clamp(2.5rem, 7vw, 4.25rem) clamp(2.5rem, 7vw, 4.25rem);
+  content: "";
+  mask-image: linear-gradient(to bottom, transparent 3%, black 30%, black 82%, transparent);
+  pointer-events: none;
 }
 
 .fitnessPhoto,
@@ -1027,41 +1093,74 @@
 
 .fitnessPhoto {
   background:
-    linear-gradient(rgba(17, 28, 21, 0.08), rgba(17, 28, 21, 0.08)),
+    linear-gradient(rgba(12, 20, 24, 0.12), rgba(12, 20, 24, 0.12)),
     url("/images/gym-platform.webp") center / cover no-repeat,
-    #39493d;
-  filter: saturate(0.58) contrast(1.08);
+    #293840;
+  filter: saturate(0.58) contrast(1.1) brightness(0.82);
   transform: scale(1.02);
   animation: imageBreathe 9s ease-in-out infinite alternate;
 }
 
 .fitnessPhotoWash {
   background:
-    linear-gradient(90deg, rgba(13, 23, 16, 0.76), rgba(13, 23, 16, 0.05) 76%),
-    linear-gradient(0deg, rgba(13, 23, 16, 0.38), transparent 54%);
+    linear-gradient(90deg, rgba(9, 16, 20, 0.84), rgba(9, 16, 20, 0.12) 64%, rgba(9, 16, 20, 0.52)),
+    linear-gradient(0deg, rgba(9, 16, 20, 0.56), transparent 58%);
+}
+
+.fitnessBrandLockup {
+  position: absolute;
+  top: clamp(0.9rem, 2vw, 1.35rem);
+  left: clamp(0.9rem, 2vw, 1.35rem);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: rgba(226, 237, 240, 0.56);
+  font-size: clamp(0.34rem, 0.52vw, 0.45rem);
+}
+
+.fitnessLogo {
+  display: block;
+  width: clamp(6.2rem, 17vw, 9.25rem);
+  aspect-ratio: 1024 / 273;
+  border-left: 0.18rem solid var(--accent);
+  background:
+    url("/images/motiv8-logo.png") center / 88% auto no-repeat,
+    rgba(244, 241, 232, 0.94);
+  box-shadow: 0 0.75rem 2rem rgba(5, 9, 11, 0.28);
 }
 
 .fitnessHeroCopy {
   position: absolute;
-  inset: auto clamp(0.7rem, 2vw, 1.35rem) clamp(0.9rem, 2.5vw, 1.7rem);
+  right: calc(clamp(8.5rem, 27%, 10.5rem) + clamp(1.6rem, 3vw, 2.5rem));
+  bottom: clamp(1.6rem, 6vw, 3.4rem);
+  left: clamp(0.9rem, 2vw, 1.35rem);
+  z-index: 3;
   display: flex;
   align-items: flex-start;
   flex-direction: column;
 }
 
 .fitnessHeroCopy span,
-.tileHeading span,
-.membershipTile > span,
-.accountTile span {
-  font-size: clamp(0.38rem, 0.58vw, 0.52rem);
-  letter-spacing: 0.13em;
+.fitnessHeroCopy > i,
+.fitnessSignalHeading,
+.fitnessFeatureList,
+.fitnessSignalChart > span,
+.fitnessStageFooter {
+  font-size: clamp(0.36rem, 0.58vw, 0.5rem);
+  letter-spacing: 0.12em;
+}
+
+.fitnessHeroCopy span {
+  color: rgba(226, 237, 240, 0.66);
 }
 
 .fitnessHeroCopy strong {
-  max-width: 11ch;
+  max-width: 15ch;
   margin-block: clamp(0.35rem, 0.8vw, 0.65rem);
+  color: var(--fitness-paper);
   font-family: var(--font-geist-sans), Arial, sans-serif;
-  font-size: clamp(1rem, 2.5vw, 2rem);
+  font-size: clamp(1.2rem, 3vw, 2.35rem);
   font-weight: 560;
   letter-spacing: -0.055em;
   line-height: 0.95;
@@ -1070,156 +1169,131 @@
 .fitnessHeroCopy > i {
   padding-bottom: 0.18rem;
   border-bottom: 1px solid currentColor;
+  color: var(--accent);
   font-family: var(--font-geist-sans), Arial, sans-serif;
-  font-size: clamp(0.45rem, 0.7vw, 0.62rem);
   font-style: normal;
   letter-spacing: 0.01em;
 }
 
-.scheduleTile {
-  display: flex;
-  min-width: 0;
-  padding: clamp(0.55rem, 1.25vw, 0.95rem);
-  grid-column: span 2;
-  flex-direction: column;
-  border-bottom: 1px solid rgba(17, 34, 22, 0.14);
-  background: #eeeee6;
-}
-
-.tileHeading {
+.fitnessStageFooter {
+  position: absolute;
+  right: calc(clamp(8.5rem, 27%, 10.5rem) + clamp(1.6rem, 3vw, 2.5rem));
+  bottom: clamp(0.8rem, 2vw, 1.2rem);
+  left: clamp(0.9rem, 2vw, 1.35rem);
+  z-index: 3;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: clamp(0.35rem, 0.8vw, 0.6rem);
-  border-bottom: 1px solid rgba(17, 34, 22, 0.15);
-  color: rgba(19, 32, 25, 0.6);
+  color: rgba(226, 237, 240, 0.54);
 }
 
-.tileHeading > i {
-  width: 0.42rem;
-  height: 0.42rem;
-  border: 1px solid #132019;
-  border-radius: 50%;
+.fitnessStageFooter span:last-child {
+  color: var(--accent);
+  font-weight: 700;
 }
 
-.scheduleRows {
+.fitnessSignal {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  width: clamp(8.5rem, 27%, 10.5rem);
+  padding: clamp(0.8rem, 1.8vw, 1.2rem);
+  border-left: 1px solid rgba(226, 237, 240, 0.2);
+  background: rgba(9, 11, 9, 0.7);
+  color: #e6edf0;
+  backdrop-filter: blur(0.45rem);
+}
+
+.fitnessSignalHeading {
   display: flex;
-  height: 100%;
-  flex-direction: column;
-  justify-content: space-evenly;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid rgba(226, 237, 240, 0.18);
 }
 
-.scheduleRows > div {
+.fitnessSignalHeading span {
+  color: rgba(226, 237, 240, 0.72);
+}
+
+.fitnessSignalHeading strong {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.fitnessFeatureList {
   display: grid;
-  grid-template-columns: minmax(3.6rem, 1.2fr) 1fr auto;
   gap: 0.45rem;
-  align-items: center;
-  color: rgba(19, 32, 25, 0.55);
-  font-family: var(--font-geist-sans), Arial, sans-serif;
-  font-size: clamp(0.44rem, 0.68vw, 0.6rem);
+  margin-top: 0.8rem;
 }
 
-.scheduleRows b {
-  color: #132019;
-  font-weight: 580;
-}
-
-.scheduleRows i,
-.accountArrow {
-  display: block;
-  width: 0.45rem;
-  height: 0.45rem;
-  border-top: 1px solid currentColor;
-  border-right: 1px solid currentColor;
-  transform: rotate(45deg);
-}
-
-.membershipTile {
-  display: flex;
-  min-width: 0;
-  padding: clamp(0.55rem, 1.25vw, 0.95rem);
-  flex-direction: column;
-  justify-content: space-between;
-  border-right: 1px solid rgba(17, 34, 22, 0.14);
-  background: #c9d9c5;
-}
-
-.membershipTile > span {
-  color: rgba(19, 32, 25, 0.55);
-}
-
-.membershipTile strong {
-  font-family: var(--font-geist-sans), Arial, sans-serif;
-  font-size: clamp(0.65rem, 1.25vw, 1rem);
-  font-weight: 550;
-  letter-spacing: -0.035em;
-  line-height: 1.03;
-}
-
-.membershipLines {
-  display: flex;
-  gap: 0.18rem;
-}
-
-.membershipLines i {
-  width: 1rem;
-  height: 0.18rem;
-  background: #132019;
-}
-
-.membershipLines i:nth-child(2) {
-  opacity: 0.4;
-}
-
-.membershipLines i:nth-child(3) {
-  opacity: 0.18;
-}
-
-.accountTile {
+.fitnessFeatureList div {
   display: grid;
-  min-width: 0;
-  padding: clamp(0.55rem, 1.25vw, 0.95rem);
-  grid-template-columns: auto 1fr auto;
-  gap: clamp(0.45rem, 1vw, 0.8rem);
+  grid-template-columns: 1.4rem 1fr 2.4rem;
+  gap: 0.4rem;
   align-items: center;
-  background: #183325;
-  color: #e9eee5;
+  padding-bottom: 0.42rem;
+  border-bottom: 1px solid rgba(226, 237, 240, 0.13);
 }
 
-.accountMark {
-  display: grid;
-  width: clamp(1.55rem, 3vw, 2.3rem);
-  aspect-ratio: 1;
-  place-items: center;
-  border: 1px solid rgba(233, 238, 229, 0.35);
-  border-radius: 50%;
-  font-family: var(--font-geist-sans), Arial, sans-serif;
-  font-size: clamp(0.7rem, 1.3vw, 1rem);
+.fitnessFeatureList span {
+  color: rgba(226, 237, 240, 0.48);
 }
 
-.accountTile > div:nth-child(2) {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.accountTile span {
-  color: rgba(233, 238, 229, 0.48);
-}
-
-.accountTile strong {
+.fitnessFeatureList b {
   overflow: hidden;
-  font-family: var(--font-geist-sans), Arial, sans-serif;
-  font-size: clamp(0.5rem, 0.8vw, 0.7rem);
-  font-weight: 520;
-  letter-spacing: -0.015em;
+  color: rgba(226, 237, 240, 0.9);
+  font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.accountArrow {
-  color: rgba(233, 238, 229, 0.72);
+.fitnessFeatureList i {
+  height: 0.22rem;
+  background: rgba(var(--accent-rgb), 0.18);
+}
+
+.fitnessFeatureList div:nth-child(1) i { width: 88%; background: var(--accent); }
+.fitnessFeatureList div:nth-child(2) i { width: 70%; background: var(--fitness-blue); }
+.fitnessFeatureList div:nth-child(3) i { width: 54%; background: var(--fitness-paper); }
+.fitnessFeatureList div:nth-child(4) i { width: 78%; background: var(--accent); }
+
+.fitnessSignalChart {
+  margin-top: 0.85rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(226, 237, 240, 0.16);
+}
+
+.fitnessSignalChart > span {
+  display: block;
+  color: rgba(226, 237, 240, 0.42);
+}
+
+.fitnessSignalChart svg {
+  display: block;
+  width: 100%;
+  height: clamp(2.4rem, 6vw, 3.2rem);
+  margin-top: 0.45rem;
+  overflow: visible;
+}
+
+.fitnessSignalChart path:first-child {
+  fill: none;
+  stroke: rgba(226, 237, 240, 0.12);
+  stroke-width: 1;
+}
+
+.fitnessSignalChart path:last-child {
+  fill: none;
+  stroke: var(--accent);
+  stroke-linecap: round;
+  stroke-width: 2;
+  stroke-dasharray: 4 5;
+  vector-effect: non-scaling-stroke;
+  animation: signalTrace 3.2s linear infinite;
 }
 
 @keyframes pathTravel {
@@ -1287,9 +1361,7 @@
 
   .panelTitleRow span:last-child,
   .telemetryTitle span:last-child,
-  .policyGrid span,
-  .scheduleRows span,
-  .browserAddress {
+  .policyGrid span {
     display: none;
   }
 
@@ -1318,29 +1390,24 @@
     display: none;
   }
 
-  .fitnessMosaic {
-    grid-template-columns: 1.3fr 0.7fr;
-    grid-template-rows: 1.35fr 0.65fr;
+  .fitnessSignal {
+    width: clamp(7.8rem, 29%, 9rem);
   }
 
-  .fitnessHeroTile {
-    grid-row: span 2;
+  .fitnessHeroCopy {
+    right: calc(clamp(7.8rem, 29%, 9rem) + 0.9rem);
   }
 
-  .scheduleTile {
-    grid-column: auto;
-  }
-
-  .membershipTile {
+  .fitnessBrandLockup > span:last-child {
     display: none;
   }
 
-  .accountTile {
-    grid-template-columns: auto 1fr;
+  .fitnessStageFooter {
+    right: calc(clamp(7.8rem, 29%, 9rem) + 0.9rem);
   }
 
-  .accountArrow {
-    display: none;
+  .fitnessSignalChart {
+    margin-top: 0.65rem;
   }
 }
 
