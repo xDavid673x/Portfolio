@@ -224,6 +224,13 @@ export function PortfolioPage() {
               >
                 GitHub
               </a>
+              <a
+                href="https://www.linkedin.com/in/david673/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                LinkedIn
+              </a>
             </div>
             <a className="nav-cta" href="#contact">
               Contact
@@ -275,6 +282,15 @@ export function PortfolioPage() {
                 rel="noreferrer"
               >
                 GitHub
+                <ArrowIcon />
+              </a>
+              <a
+                className="hero-github"
+                href="https://www.linkedin.com/in/david673/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                LinkedIn
                 <ArrowIcon />
               </a>
             </div>
@@ -582,6 +598,13 @@ export function PortfolioPage() {
               rel="noreferrer"
             >
               GitHub profile
+            </a>
+            <a
+              href="https://www.linkedin.com/in/david673/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              LinkedIn profile
             </a>
             <a href="#top">Back to top</a>
           </div>
