@@ -1,25 +1,17 @@
 import styles from "./project-visuals.module.css";
 
-export type ProjectVisualType = "robot" | "autonomy" | "fitness";
+export type ProjectVisualType = "robot" | "spider" | "fitness";
 
 type ProjectVisualProps = {
   type: ProjectVisualType;
   className?: string;
 };
 
-const perceptionPoints = [
-  [64, 84],
-  [78, 72],
-  [92, 62],
-  [108, 55],
-  [127, 51],
-  [147, 53],
-  [165, 60],
-  [181, 71],
-  [195, 85],
+const gaitBands = [
+  ["TRIPOD A", "L1 / R2 / L3"],
+  ["TRIPOD B", "R1 / L2 / R3"],
+  ["STABILITY", "BODY LEVEL"],
 ] as const;
-
-const telemetryBands = ["PERCEPTION", "PLANNING", "CONTROL"] as const;
 
 const simulationKeyTimes = "0;0.12;0.25;0.42;0.54;0.68;0.82;0.94;1";
 const simulationKeySplines =
@@ -246,108 +238,132 @@ export function RoboticArmVisual({ className }: { className?: string }) {
   );
 }
 
-export function FormulaAutonomyVisual({ className }: { className?: string }) {
+export function SpiderHexapodVisual({ className }: { className?: string }) {
   return (
     <figure
-      className={joinClassNames(styles.visual, styles.autonomyVisual, className)}
+      className={joinClassNames(styles.visual, styles.spiderVisual, className)}
       role="img"
-      aria-label="Formula Student autonomy display showing perception boundaries, a predicted driving corridor, and the perception, planning, and control pipeline."
+      aria-label="Technical hexapod robot preview showing six articulated legs, alternating tripod gait phases, and compact 18 degree-of-freedom telemetry."
     >
       <div className={styles.technicalHeader} aria-hidden="true">
-        <span>FORMULA STUDENT / AUTONOMY</span>
+        <span>ROBOSOC / HEXAPOD GAIT</span>
         <span className={styles.headerState}>
-          <i /> PIPELINE ONLINE
+          <i /> TRIPOD STABLE
         </span>
       </div>
 
-      <div className={styles.autonomyLayout} aria-hidden="true">
-        <div className={styles.trackViewport}>
-          <span className={styles.viewportLabel}>PLANNED CORRIDOR</span>
+      <div className={styles.spiderLayout} aria-hidden="true">
+        <div className={styles.spiderViewport}>
+          <span className={styles.viewportLabel}>GAIT ENVELOPE</span>
           <svg
-            className={styles.trackSvg}
-            viewBox="0 0 260 230"
+            className={styles.spiderSvg}
+            viewBox="0 0 560 330"
             preserveAspectRatio="xMidYMid meet"
           >
-            <g className={styles.trackGrid}>
-              <path d="M14 42H246M14 82H246M14 122H246M14 162H246M14 202H246" />
-              <path d="M43 18V216M86 18V216M129 18V216M172 18V216M215 18V216" />
+            <g className={styles.spiderGrid}>
+              <path d="M54 66H506M54 121H506M54 176H506M54 231H506M54 286H506" />
+              <path d="M92 38V300M154 38V300M216 38V300M278 38V300M340 38V300M402 38V300M464 38V300" />
             </g>
 
             <path
-              className={styles.trackEdge}
-              d="M49 219C51 181 72 162 73 130C74 100 57 75 74 47C88 25 113 19 137 18"
+              className={styles.spiderStrideEnvelope}
+              d="M107 92C160 54 238 43 281 43C326 43 401 55 453 92M107 238C160 277 238 287 281 287C326 287 401 276 453 238"
             />
             <path
-              className={styles.trackEdge}
-              d="M204 219C201 180 176 164 177 131C179 99 205 77 187 49C174 28 156 21 137 18"
+              className={styles.spiderPhasePathA}
+              d="M98 248C143 214 154 161 111 94M282 286C282 245 281 203 280 166M462 94C417 129 407 180 449 248"
             />
             <path
-              className={styles.safeCorridor}
-              d="M127 218C126 184 120 164 125 132C130 103 143 77 137 48C134 33 134 24 137 18"
-            />
-            <path
-              className={styles.plannedPath}
-              d="M127 218C126 184 120 164 125 132C130 103 143 77 137 48C134 33 134 24 137 18"
+              className={styles.spiderPhasePathB}
+              d="M98 94C144 130 154 181 111 248M282 44C282 84 281 125 280 166M462 248C416 212 407 160 449 94"
             />
 
-            <path className={styles.perceptionCone} d="M127 193L51 95L202 95Z" />
-            <path className={styles.perceptionRay} d="M127 193L78 102M127 193L126 93M127 193L177 103" />
-
-            <g className={styles.boundaryPoints}>
-              {perceptionPoints.map(([x, y], index) => (
-                <g key={`${x}-${y}`}>
-                  <circle cx={x} cy={y} r="4" />
-                  <circle cx={260 - x} cy={y} r="4" />
-                  {index % 3 === 0 ? <circle cx={x} cy={y} r="9" className={styles.pointEcho} /> : null}
-                </g>
-              ))}
-              <circle cx="58" cy="113" r="4" />
-              <circle cx="202" cy="113" r="4" />
-              <circle cx="50" cy="147" r="4" />
-              <circle cx="210" cy="147" r="4" />
-              <circle cx="47" cy="184" r="4" />
-              <circle cx="213" cy="184" r="4" />
+            <g className={styles.spiderBodyShadow}>
+              <ellipse cx="280" cy="177" rx="94" ry="33" />
             </g>
 
-            <g className={styles.carMarker}>
-              <path d="M117 181L121 164H135L140 181L136 201H121Z" />
-              <path d="M121 174H136M126 164V153M131 164V153" />
-              <circle cx="121" cy="188" r="2" />
-              <circle cx="136" cy="188" r="2" />
+            <g className={styles.spiderLegs}>
+              <g className={styles.tripodA}>
+                <path d="M223 142L165 111L104 86" />
+                <path d="M281 135L281 89L281 42" />
+                <path d="M337 191L394 218L457 251" />
+              </g>
+              <g className={styles.tripodB}>
+                <path d="M337 142L397 113L458 87" />
+                <path d="M281 196L281 241L280 288" />
+                <path d="M223 190L166 218L105 250" />
+              </g>
+              <g className={styles.spiderLegJoints}>
+                <circle cx="223" cy="142" r="8" />
+                <circle cx="165" cy="111" r="6" />
+                <circle cx="104" cy="86" r="5" />
+                <circle cx="281" cy="135" r="8" />
+                <circle cx="281" cy="89" r="6" />
+                <circle cx="281" cy="42" r="5" />
+                <circle cx="337" cy="191" r="8" />
+                <circle cx="394" cy="218" r="6" />
+                <circle cx="457" cy="251" r="5" />
+                <circle cx="337" cy="142" r="8" />
+                <circle cx="397" cy="113" r="6" />
+                <circle cx="458" cy="87" r="5" />
+                <circle cx="281" cy="196" r="8" />
+                <circle cx="281" cy="241" r="6" />
+                <circle cx="280" cy="288" r="5" />
+                <circle cx="223" cy="190" r="8" />
+                <circle cx="166" cy="218" r="6" />
+                <circle cx="105" cy="250" r="5" />
+              </g>
+            </g>
+
+            <g className={styles.spiderChassis}>
+              <path d="M206 142Q225 109 281 107Q335 109 355 142L375 168L353 195Q333 223 281 225Q227 223 206 195L185 168Z" />
+              <path d="M225 138Q241 124 281 123Q320 124 336 138L350 168L335 198Q320 209 281 211Q241 209 225 198L211 168Z" />
+              <path d="M244 150H317M236 168H326M244 186H317" />
+              <circle cx="247" cy="168" r="5" />
+              <circle cx="314" cy="168" r="5" />
+            </g>
+
+            <g className={styles.spiderFootfallMarkers}>
+              <circle cx="104" cy="86" r="11" />
+              <circle cx="281" cy="42" r="11" />
+              <circle cx="457" cy="251" r="11" />
+              <circle cx="458" cy="87" r="11" />
+              <circle cx="280" cy="288" r="11" />
+              <circle cx="105" cy="250" r="11" />
             </g>
           </svg>
 
-          <div className={styles.trackLegend}>
-            <span><i className={styles.boundaryKey} /> Boundary</span>
-            <span><i className={styles.pathKey} /> Path</span>
+          <div className={styles.spiderLegend}>
+            <span><i className={styles.tripodAKey} /> Tripod A</span>
+            <span><i className={styles.tripodBKey} /> Tripod B</span>
           </div>
         </div>
 
-        <aside className={styles.telemetryPanel}>
-          <div className={styles.telemetryTitle}>
-            <span>SYSTEM FLOW</span>
-            <span>INPUT TO ACTUATION</span>
+        <aside className={styles.spiderTelemetry}>
+          <div className={styles.spiderTelemetryTitle}>
+            <span>LOCOMOTION</span>
+            <span>18 DOF</span>
           </div>
 
-          <div className={styles.modelReadout}>
+          <div className={styles.spiderReadout}>
             <div>
-              <span>AI / ML POLICY</span>
-              <strong>ACTOR-CRITIC</strong>
+              <span>GAIT STATE</span>
+              <strong>TRIPOD WALK</strong>
             </div>
-            <div className={styles.modelMetrics}>
-              <span>CONF <b>0.96</b></span>
-              <span>LAT <b>18ms</b></span>
+            <div className={styles.spiderMetrics}>
+              <span>ROLL <b>1.8deg</b></span>
+              <span>STEP <b>64%</b></span>
             </div>
           </div>
 
-          <div className={styles.pipelineBands}>
-            {telemetryBands.map((band, index) => (
-              <div className={styles.pipelineBand} key={band}>
+          <div className={styles.gaitBands}>
+            {gaitBands.map(([band, detail]) => (
+              <div className={styles.gaitBand} key={band}>
                 <div>
                   <span>{band}</span>
-                  <small>{index === 0 ? "SENSORS" : index === 1 ? "PATH" : "VEHICLE"}</small>
+                  <small>{detail}</small>
                 </div>
-                <div className={styles.bandSignal}>
+                <div className={styles.gaitSignal}>
                   <i />
                   <i />
                   <i />
@@ -358,13 +374,13 @@ export function FormulaAutonomyVisual({ className }: { className?: string }) {
             ))}
           </div>
 
-          <div className={styles.steeringMap}>
-            <span>LATERAL COMMAND</span>
+          <div className={styles.gaitMap}>
+            <span>SERVO LOAD / BODY LEVEL</span>
             <svg viewBox="0 0 210 60" preserveAspectRatio="none">
               <path className={styles.chartGrid} d="M0 15H210M0 30H210M0 45H210" />
               <path
-                className={styles.steeringLine}
-                d="M0 37C18 37 27 21 46 23C64 25 69 42 88 38C109 34 111 15 132 18C155 21 164 45 184 39C198 35 201 25 210 24"
+                className={styles.gaitLine}
+                d="M0 38C16 31 25 31 38 39C52 48 63 48 77 37C91 26 104 25 118 36C133 47 145 47 159 36C174 25 188 24 210 31"
               />
             </svg>
           </div>
@@ -436,8 +452,8 @@ export function ProjectVisual({ type, className }: ProjectVisualProps) {
     return <RoboticArmVisual className={className} />;
   }
 
-  if (type === "autonomy") {
-    return <FormulaAutonomyVisual className={className} />;
+  if (type === "spider") {
+    return <SpiderHexapodVisual className={className} />;
   }
 
   return <FitnessPlatformVisual className={className} />;

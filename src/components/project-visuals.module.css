@@ -69,7 +69,7 @@
 }
 
 .robotLayout,
-.autonomyLayout {
+.spiderLayout {
   position: relative;
   z-index: 2;
   display: grid;
@@ -78,7 +78,7 @@
 }
 
 .robotStage,
-.trackViewport {
+.spiderViewport {
   position: relative;
   min-width: 0;
   overflow: hidden;
@@ -86,7 +86,7 @@
 }
 
 .robotStage::before,
-.trackViewport::before {
+.spiderViewport::before {
   position: absolute;
   inset: 0;
   background: linear-gradient(112deg, rgba(255, 255, 255, 0.025), transparent 45%);
@@ -108,7 +108,7 @@
 }
 
 .robotSvg,
-.trackSvg {
+.spiderSvg {
   width: 100%;
   height: calc(100% - 1.85rem);
   color: var(--accent);
@@ -245,7 +245,7 @@
 }
 
 .stageLegend,
-.trackLegend {
+.spiderLegend {
   position: absolute;
   right: 0.85rem;
   bottom: 0.75rem;
@@ -260,14 +260,14 @@
 }
 
 .stageLegend span,
-.trackLegend span {
+.spiderLegend span {
   display: inline-flex;
   gap: 0.35rem;
   align-items: center;
 }
 
 .stageLegend i,
-.trackLegend i {
+.spiderLegend i {
   display: inline-block;
   flex: 0 0 auto;
 }
@@ -295,7 +295,7 @@
 }
 
 .panelTitleRow,
-.telemetryTitle {
+.spiderTelemetryTitle {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -305,7 +305,7 @@
 }
 
 .panelTitleRow span:first-child,
-.telemetryTitle span:first-child {
+.spiderTelemetryTitle span:first-child {
   color: rgba(255, 255, 255, 0.82);
 }
 
@@ -752,12 +752,13 @@
   font-weight: 700;
 }
 
-.autonomyVisual {
+.spiderVisual {
   --accent: #668397;
   --accent-rgb: 102, 131, 151;
-  --autonomy-coral: #f07a52;
-  --autonomy-paper: #d9e2e6;
-  --autonomy-slate: #2b3a43;
+  --spider-coral: #f07a52;
+  --spider-paper: #d9e2e6;
+  --spider-slate: #2b3a43;
+  --phase-b: #8fb0c3;
   aspect-ratio: auto;
   border: 0;
   border-radius: 0;
@@ -769,7 +770,7 @@
   color: #e6edf0;
 }
 
-.autonomyVisual::before {
+.spiderVisual::before {
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -782,30 +783,48 @@
   pointer-events: none;
 }
 
-.autonomyVisual .technicalHeader {
+.spiderVisual .technicalHeader {
   height: clamp(2.8rem, 10%, 3.4rem);
   border-bottom-color: rgba(226, 237, 240, 0.16);
   color: rgba(226, 237, 240, 0.62);
 }
 
-.autonomyVisual .headerState {
+.spiderVisual .headerState {
   color: #e6edf0;
 }
 
-.autonomyVisual .headerState i {
-  background: var(--autonomy-coral);
+.spiderVisual .headerState i {
+  background: var(--spider-coral);
   box-shadow: none;
 }
 
-.autonomyLayout {
+.spiderLayout {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(10rem, 0.82fr);
   height: calc(100% - clamp(2.8rem, 10%, 3.4rem));
 }
 
-.autonomyVisual .trackViewport {
+.spiderViewport {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border-right: 1px solid rgba(226, 237, 240, 0.16);
+}
+
+.spiderViewport::before {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(112deg, rgba(255, 255, 255, 0.025), transparent 45%);
+  content: "";
+}
+
+.spiderVisual .spiderViewport {
   border-right-color: rgba(226, 237, 240, 0.16);
 }
 
-.autonomyVisual .trackGrid {
+.spiderVisual .spiderGrid {
   stroke: rgba(102, 131, 151, 0.22);
 }
 
@@ -818,86 +837,201 @@
   font-size: clamp(0.4rem, 0.6vw, 0.53rem);
 }
 
-.trackGrid {
-  stroke: rgba(73, 174, 255, 0.09);
+.spiderSvg {
+  display: block;
+  width: 100%;
+  height: calc(100% - 1.85rem);
+  color: var(--accent);
 }
 
-.trackEdge {
+.spiderGrid {
+  fill: none;
+  stroke: rgba(73, 174, 255, 0.09);
+  stroke-width: 0.75;
+  vector-effect: non-scaling-stroke;
+}
+
+.spiderStrideEnvelope {
   fill: none;
   stroke: rgba(226, 237, 240, 0.3);
   stroke-width: 1;
-  stroke-dasharray: 2 4;
+  stroke-dasharray: 3 6;
+  vector-effect: non-scaling-stroke;
 }
 
-.safeCorridor {
+.spiderPhasePathA,
+.spiderPhasePathB {
   fill: none;
-  stroke: rgba(240, 122, 82, 0.13);
-  stroke-linecap: round;
-  stroke-width: 24;
-}
-
-.plannedPath {
-  fill: none;
-  stroke: var(--autonomy-coral);
   stroke-linecap: round;
   stroke-width: 2;
-  stroke-dasharray: 7 6;
-  animation: pathTravel 6s linear infinite;
+  stroke-dasharray: 7 8;
+  vector-effect: non-scaling-stroke;
+  animation: pathTravel 6.8s linear infinite;
 }
 
-.perceptionCone {
-  fill: rgba(102, 131, 151, 0.09);
-  stroke: rgba(102, 131, 151, 0.35);
-  stroke-width: 0.8;
+.spiderPhasePathA {
+  stroke: var(--spider-coral);
 }
 
-.perceptionRay {
+.spiderPhasePathB {
+  stroke: var(--phase-b);
+  animation-delay: -3.4s;
+}
+
+.spiderBodyShadow {
+  fill: rgba(0, 0, 0, 0.26);
+  filter: blur(2px);
+}
+
+.spiderLegs {
   fill: none;
-  stroke: rgba(102, 131, 151, 0.24);
-  stroke-width: 0.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.boundaryPoints {
-  fill: var(--autonomy-paper);
+.tripodA,
+.tripodB {
+  stroke-width: 13;
+  transform-box: view-box;
+  vector-effect: non-scaling-stroke;
+}
+
+.tripodA {
+  stroke: var(--spider-coral);
+  animation: tripodAFloat 4.8s ease-in-out infinite;
+}
+
+.tripodB {
+  stroke: var(--phase-b);
+  animation: tripodBFloat 4.8s ease-in-out infinite;
+}
+
+.spiderLegJoints {
+  fill: var(--spider-paper);
   stroke: #10181e;
-  stroke-width: 1.5;
+  stroke-width: 2;
 }
 
-.boundaryPoints > g:nth-child(even) > circle:first-child,
-.boundaryPoints > circle:nth-last-child(-n + 3) {
-  fill: var(--autonomy-coral);
+.spiderLegJoints circle:nth-child(3n) {
+  fill: var(--spider-coral);
 }
 
-.pointEcho {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 0.8;
-  animation: pointPing 3s ease-out infinite;
+.spiderLegJoints circle:nth-child(n + 10):nth-child(-n + 18):nth-child(3n) {
+  fill: var(--phase-b);
 }
 
-.carMarker {
-  fill: var(--autonomy-paper);
+.spiderChassis {
+  fill: var(--spider-paper);
   stroke: #10181e;
-  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 4;
   filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.22));
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: chassisSettle 4.8s ease-in-out infinite;
 }
 
-.boundaryKey {
-  width: 0.42rem;
-  height: 0.42rem;
-  border-radius: 50%;
-  background: var(--autonomy-paper);
-  box-shadow: 0 0 0 2px rgba(217, 226, 230, 0.14);
+.spiderChassis path:first-child {
+  fill: var(--spider-slate);
 }
 
-.pipelineBands {
+.spiderChassis path:nth-child(2) {
+  fill: var(--spider-paper);
+}
+
+.spiderChassis path:nth-child(3) {
+  fill: none;
+  stroke: rgba(16, 24, 30, 0.42);
+  stroke-width: 2;
+}
+
+.spiderChassis circle {
+  fill: var(--spider-coral);
+}
+
+.spiderFootfallMarkers {
+  fill: none;
+  stroke-width: 1.4;
+}
+
+.spiderFootfallMarkers circle {
+  stroke: rgba(217, 226, 230, 0.42);
+  animation: footfallPing 4.8s ease-in-out infinite;
+}
+
+.spiderFootfallMarkers circle:nth-child(-n + 3) {
+  stroke: var(--spider-coral);
+}
+
+.spiderFootfallMarkers circle:nth-child(n + 4) {
+  stroke: var(--phase-b);
+  animation-delay: -2.4s;
+}
+
+.spiderLegend {
+  position: absolute;
+  right: 0.85rem;
+  bottom: 0.75rem;
+  left: 0.85rem;
+  display: flex;
+  gap: clamp(0.65rem, 2vw, 1.25rem);
+  align-items: center;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: clamp(0.42rem, 0.6vw, 0.55rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.spiderLegend span {
+  display: inline-flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.tripodAKey,
+.tripodBKey {
+  width: 1.15rem;
+  border-top: 2px solid;
+}
+
+.tripodAKey {
+  border-color: var(--spider-coral);
+}
+
+.tripodBKey {
+  border-color: var(--phase-b);
+}
+
+.spiderTelemetry {
+  display: flex;
+  min-width: 0;
+  padding: clamp(0.7rem, 2vw, 1.15rem);
+  flex-direction: column;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.spiderTelemetryTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: clamp(0.5rem, 1vw, 0.85rem);
+  color: rgba(255, 255, 255, 0.38);
+  font-size: clamp(0.38rem, 0.58vw, 0.52rem);
+}
+
+.spiderTelemetryTitle span:first-child {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.gaitBands {
   display: flex;
   flex: 1;
   flex-direction: column;
   justify-content: center;
 }
 
-.pipelineBand {
+.gaitBand {
   display: grid;
   grid-template-columns: minmax(4.2rem, 0.85fr) 1.3fr;
   gap: 0.7rem;
@@ -906,34 +1040,34 @@
   border-top: 1px solid var(--line);
 }
 
-.pipelineBand:last-child {
+.gaitBand:last-child {
   border-bottom: 1px solid var(--line);
 }
 
-.pipelineBand > div:first-child {
+.gaitBand > div:first-child {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
 }
 
-.pipelineBand span {
+.gaitBand span {
   color: rgba(255, 255, 255, 0.75);
   font-size: clamp(0.36rem, 0.56vw, 0.5rem);
 }
 
-.pipelineBand small {
+.gaitBand small {
   color: rgba(255, 255, 255, 0.28);
   font-size: clamp(0.3rem, 0.47vw, 0.42rem);
 }
 
-.bandSignal {
+.gaitSignal {
   display: flex;
   gap: 0.2rem;
   align-items: end;
   height: 1.35rem;
 }
 
-.bandSignal i {
+.gaitSignal i {
   flex: 1;
   height: 32%;
   background: rgba(var(--accent-rgb), 0.24);
@@ -941,50 +1075,58 @@
   animation: bandPulse 3.2s ease-in-out infinite;
 }
 
-.bandSignal i:nth-child(2) {
+.gaitBand:nth-child(1) .gaitSignal i {
+  background: rgba(240, 122, 82, 0.28);
+}
+
+.gaitBand:nth-child(2) .gaitSignal i {
+  background: rgba(143, 176, 195, 0.3);
+}
+
+.gaitSignal i:nth-child(2) {
   height: 74%;
   animation-delay: -2.4s;
 }
 
-.bandSignal i:nth-child(3) {
+.gaitSignal i:nth-child(3) {
   height: 48%;
   animation-delay: -1.6s;
 }
 
-.bandSignal i:nth-child(4) {
+.gaitSignal i:nth-child(4) {
   height: 92%;
   animation-delay: -0.8s;
 }
 
-.bandSignal i:nth-child(5) {
+.gaitSignal i:nth-child(5) {
   height: 61%;
 }
 
-.steeringMap {
+.gaitMap {
   padding-top: clamp(0.55rem, 1.2vw, 0.8rem);
 }
 
-.steeringMap > span {
+.gaitMap > span {
   display: block;
   margin-bottom: 0.35rem;
   color: rgba(255, 255, 255, 0.35);
   font-size: clamp(0.34rem, 0.5vw, 0.45rem);
 }
 
-.steeringMap svg {
+.gaitMap svg {
   width: 100%;
   height: clamp(1.75rem, 4.8vw, 3.25rem);
   overflow: visible;
 }
 
-.steeringLine {
+.gaitLine {
   fill: none;
-  stroke: var(--autonomy-coral);
+  stroke: var(--spider-coral);
   stroke-width: 1.5;
   vector-effect: non-scaling-stroke;
 }
 
-.modelReadout {
+.spiderReadout {
   display: flex;
   align-items: end;
   justify-content: space-between;
@@ -993,22 +1135,22 @@
   border-bottom: 1px solid var(--line);
 }
 
-.modelReadout > div:first-child {
+.spiderReadout > div:first-child {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: 0.22rem;
 }
 
-.modelReadout span,
-.modelMetrics span {
+.spiderReadout span,
+.spiderMetrics span {
   color: rgba(226, 237, 240, 0.42);
   font-size: clamp(0.32rem, 0.5vw, 0.44rem);
 }
 
-.modelReadout strong {
+.spiderReadout strong {
   overflow: hidden;
-  color: var(--autonomy-paper);
+  color: var(--spider-paper);
   font-size: clamp(0.46rem, 0.72vw, 0.62rem);
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -1016,14 +1158,14 @@
   white-space: nowrap;
 }
 
-.modelMetrics {
+.spiderMetrics {
   display: flex;
   flex-shrink: 0;
   gap: 0.5rem;
 }
 
-.modelMetrics b {
-  color: var(--autonomy-coral);
+.spiderMetrics b {
+  color: var(--spider-coral);
   font-weight: 600;
 }
 
@@ -1344,6 +1486,26 @@
   50% { opacity: 1; transform: scaleY(1); }
 }
 
+@keyframes tripodAFloat {
+  0%, 100% { opacity: 0.72; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-4px); }
+}
+
+@keyframes tripodBFloat {
+  0%, 100% { opacity: 1; transform: translateY(-4px); }
+  50% { opacity: 0.72; transform: translateY(0); }
+}
+
+@keyframes chassisSettle {
+  0%, 100% { transform: translateY(-1px); }
+  50% { transform: translateY(1px); }
+}
+
+@keyframes footfallPing {
+  0%, 100% { opacity: 0.18; transform: scale(0.72); }
+  50% { opacity: 0.92; transform: scale(1.05); }
+}
+
 @keyframes imageBreathe {
   from { transform: scale(1.02); }
   to { transform: scale(1.08); }
@@ -1355,12 +1517,12 @@
   }
 
   .robotLayout,
-  .autonomyLayout {
+  .spiderLayout {
     grid-template-columns: minmax(0, 1.4fr) minmax(7.25rem, 0.7fr);
   }
 
   .panelTitleRow span:last-child,
-  .telemetryTitle span:last-child,
+  .spiderTelemetryTitle span:last-child,
   .policyGrid span {
     display: none;
   }
@@ -1381,12 +1543,12 @@
     display: none;
   }
 
-  .pipelineBand {
+  .gaitBand {
     grid-template-columns: 1fr;
     gap: 0.3rem;
   }
 
-  .pipelineBand small {
+  .gaitBand small {
     display: none;
   }
 
@@ -1424,5 +1586,12 @@
   .robotVisual animateMotion,
   .robotVisual animateTransform {
     display: none;
+  }
+
+  .tripodA,
+  .tripodB,
+  .spiderChassis,
+  .spiderFootfallMarkers circle {
+    transform: none !important;
   }
 }
