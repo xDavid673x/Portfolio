@@ -28,6 +28,23 @@ const RoboticArmScene = dynamic(
   },
 );
 
+const RobosocSpiderScene = dynamic(
+  () =>
+    import("@/components/three/robosoc-spider-scene").then(
+      (module) => module.RobosocSpiderScene,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="scene-loading" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </div>
+    ),
+  },
+);
+
 gsap.registerPlugin(useGSAP);
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -409,6 +426,17 @@ export function PortfolioPage() {
                       <div className="robotic-arm-scene-note" aria-hidden="true">
                         <span>Pick → transfer → place</span>
                         <span>Continuous workcell cycle</span>
+                      </div>
+                    </div>
+                  ) : project.id === "robosoc-spider" ? (
+                    <div className="robosoc-spider-scene-frame">
+                      <RobosocSpiderScene
+                        className="robosoc-spider-project-scene"
+                        label="The articulated RoboSoc hexapod performing a continuous alternating-tripod patrol"
+                      />
+                      <div className="robosoc-spider-scene-note" aria-hidden="true">
+                        <span>Tripod A / Tripod B</span>
+                        <span>Continuous patrol cycle</span>
                       </div>
                     </div>
                   ) : (

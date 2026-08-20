@@ -993,20 +993,23 @@ button:hover .arrow-icon--back {
   height: 100%;
 }
 
-.robotic-arm-scene-frame {
+.robotic-arm-scene-frame,
+.robosoc-spider-scene-frame {
   position: relative;
   isolation: isolate;
   min-height: 32rem;
   background: #070a0c;
 }
 
-.robotic-arm-project-scene {
+.robotic-arm-project-scene,
+.robosoc-spider-project-scene {
   position: absolute;
   inset: 0;
   min-height: 100%;
 }
 
-.robotic-arm-scene-note {
+.robotic-arm-scene-note,
+.robosoc-spider-scene-note {
   position: absolute;
   right: 1rem;
   bottom: 1rem;
