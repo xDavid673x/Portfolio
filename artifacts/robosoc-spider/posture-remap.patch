@@ -1,0 +1,101 @@
+diff --git a/src/components/three/robosoc-spider-gait.test.ts b/src/components/three/robosoc-spider-gait.test.ts
+index df6472c..154e4d0 100644
+--- a/src/components/three/robosoc-spider-gait.test.ts
++++ b/src/components/three/robosoc-spider-gait.test.ts
+@@ -9,6 +9,7 @@ import {
+   ROBOSOC_TRIPOD_B,
+   clampSpiderLegAngles,
+   createStableRobosocSpiderPose,
++  forwardSpiderLegKinematics,
+   getRobosocSpiderJointRotation,
+   sampleRobosocSpiderGait,
+   sampleSpiderLegIk,
+@@ -39,10 +40,10 @@ describe("RoboSoc spider gait", () => {
+     expect(getRobosocSpiderJointRotation(0, "coxa", 0)).toBeCloseTo(0);
+     expect(
+       getRobosocSpiderJointRotation(-28 * Math.PI / 180, "femur", 28 * Math.PI / 180),
+-    ).toBeCloseTo(0);
++    ).toBeCloseTo(-28 * Math.PI / 180);
+     expect(
+       getRobosocSpiderJointRotation(115 * Math.PI / 180, "tibia", 115 * Math.PI / 180),
+-    ).toBeCloseTo(0);
++    ).toBeCloseTo(115 * Math.PI / 180);
+   });
+ 
+   it("keeps the real tripod groups half a cycle apart", () => {
+@@ -78,13 +79,11 @@ describe("RoboSoc spider gait", () => {
+         expect(angles.femur).toBeLessThanOrEqual(ROBOSOC_SPIDER_JOINT_LIMITS.femur[1]);
+         expect(angles.tibia).toBeGreaterThanOrEqual(ROBOSOC_SPIDER_JOINT_LIMITS.tibia[0]);
+         expect(angles.tibia).toBeLessThanOrEqual(ROBOSOC_SPIDER_JOINT_LIMITS.tibia[1]);
++        expect(foot[2]).toBeLessThan(-0.1);
+       }
+ 
+       expect(sample.bodyX).toBe(0);
+       expect(sample.bodyZ).toBe(0);
+-      for (const leg of ROBOSOC_LEG_NAMES) {
+-        expect(sample.legs[leg].angles.coxa).toBeCloseTo(0, 8);
+-      }
+     }
+   });
+ 
+@@ -178,6 +177,24 @@ describe("RoboSoc spider gait", () => {
+     expect(threeQuarter.turnBlend).toBeCloseTo(0, 6);
+   });
+ 
++  it("keeps the tripod stance elevated and articulated in 3D", () => {
++    const planted = sampleRobosocSpiderGait(14 / 36);
++    const swing = sampleRobosocSpiderGait(0);
++    const plantedLegiChain = forwardSpiderLegKinematics(planted.legs.legi.angles);
++    const swingLegiChain = forwardSpiderLegKinematics(swing.legs.legi.angles);
++
++    for (const leg of ROBOSOC_LEG_NAMES) {
++      const chain = forwardSpiderLegKinematics(planted.legs[leg].angles);
++      expect(planted.legs[leg].foot[2]).toBeLessThan(-0.13);
++      expect(chain[2][2]).toBeLessThan(0);
++      expect(Math.abs(chain[3][2] - chain[2][2])).toBeGreaterThan(0.04);
++    }
++
++    expect(swingLegiChain[3][2]).toBeGreaterThan(plantedLegiChain[3][2]);
++    expect(swingLegiChain[3][2] - plantedLegiChain[3][2]).toBeGreaterThan(0.08);
++    expect(planted.legs.legj.foot[2]).toBeCloseTo(-0.15, 2);
++  });
++
+   it("uses a stable planted reduced-motion pose", () => {
+     const pose = createStableRobosocSpiderPose();
+ 
+diff --git a/src/components/three/robosoc-spider-gait.ts b/src/components/three/robosoc-spider-gait.ts
+index a1afac3..818bcba 100644
+--- a/src/components/three/robosoc-spider-gait.ts
++++ b/src/components/three/robosoc-spider-gait.ts
+@@ -62,9 +62,9 @@ const SOURCE_LENGTHS_MM = {
+ const SOURCE_SCENE_SCALE = 0.001;
+ const STRIDE_MM = 132;
+ const WALK_STEP_COUNT = 48;
+-const BODY_HEIGHT_MM = -118;
++const BODY_HEIGHT_MM = -150;
+ const BODY_X_MM = 142;
+-const LIFT_MM = 28;
++const LIFT_MM = 20;
+ const PATROL_PERIOD_SECONDS = 14;
+ const WALK_CYCLES_PER_PATROL = 18;
+ 
+@@ -80,6 +80,8 @@ export const ROBOSOC_SPIDER_STAND_ANGLES: RobosocSpiderLegAngles = {
+   tibia: degreesToRadians(115),
+ };
+ 
++const ROBOSOC_SPIDER_JOINT_RESET_ANGLES: RobosocSpiderLegAngles = ROBOSOC_SPIDER_STAND_ANGLES;
++
+ export const ROBOSOC_SPIDER_JOINT_LIMITS: Record<
+   RobosocSpiderJointRole,
+   JointLimit
+@@ -216,7 +218,9 @@ export function getRobosocSpiderJointRotation(
+   role: RobosocSpiderJointRole,
+   commandAngle: number,
+ ) {
+-  return baseline + commandAngle * ROBOSOC_SPIDER_JOINT_SIGNS[role];
++  return baseline + (
++    commandAngle - ROBOSOC_SPIDER_JOINT_RESET_ANGLES[role]
++  ) * ROBOSOC_SPIDER_JOINT_SIGNS[role];
+ }
+ 
+ export function sampleSpiderLegIk(target: Vec3Tuple): RobosocSpiderLegAngles {

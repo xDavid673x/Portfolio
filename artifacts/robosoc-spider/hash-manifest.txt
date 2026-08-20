@@ -1,0 +1,10 @@
+baseline commit: 6fc07e1
+modified commit: 7815f2f
+
+Baseline hashes (from Git):
+dbaa78a330cfcb29b503ccde48b7f58634f4a5a1edbfd589db4366b34ea51d3b  -
+e0e4ddecf6fc17e923a1612241f9059bde8477049d459ae255a8b2e9dcd419e2  -
+
+Modified hashes (working tree):
+f5259bc72d26f5941ec9072b30cdce5e2a137b38f0e589568ef7e0f78521686d  src/components/three/robosoc-spider-gait.ts
+2205b1b0417fe22b0363b9dda51a2f7a4661606b3370718fbbea707a593c0588  src/components/three/robosoc-spider-gait.test.ts
