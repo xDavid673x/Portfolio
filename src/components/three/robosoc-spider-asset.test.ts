@@ -4,8 +4,14 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import {
+  ROBOSOC_LEG_NAMES,
+  ROBOSOC_SPIDER_GAIT_COMPENSATION,
+} from "./robosoc-spider-gait";
+
 type GlbNode = {
   children?: number[];
+  extras?: { gaitCompensationRad?: number };
   mesh?: number;
   name?: string;
 };
@@ -95,6 +101,12 @@ describe("committed RoboSoc spider asset", () => {
         const childIndex = nodeIndexByName.get(chain[index + 1])!;
         expect(parent.children).toContain(childIndex);
       }
+
+      const legName = leg as (typeof ROBOSOC_LEG_NAMES)[number];
+      expect(ROBOSOC_SPIDER_GAIT_COMPENSATION[legName]).toBeCloseTo(
+        nodes[nodeIndexByName.get(leg)!].extras?.gaitCompensationRad ?? NaN,
+        8,
+      );
     }
 
     expect(document.meshes).toHaveLength(8);

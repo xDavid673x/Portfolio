@@ -65,7 +65,7 @@ const BODY_HEIGHT_MM = -118;
 const BODY_X_MM = 142;
 const LIFT_MM = 28;
 const PATROL_PERIOD_SECONDS = 14;
-const WALK_CYCLES_PER_SECOND = 1.28;
+const WALK_CYCLES_PER_PATROL = 18;
 const MAX_TURN_YAW = Math.PI;
 
 export const ROBOSOC_SPIDER_LEG_LENGTHS: LegLengths = {
@@ -100,11 +100,11 @@ export const ROBOSOC_SPIDER_JOINT_SIGNS: Record<
 
 export const ROBOSOC_SPIDER_GAIT_COMPENSATION: Record<RobosocLegName, number> = {
   legi: 0,
-  legj: Math.PI / 4,
-  legk: 3 * Math.PI / 4,
-  legl: Math.PI,
-  legm: -3 * Math.PI / 4,
-  legn: -Math.PI / 4,
+  legj: Math.PI / 3,
+  legk: 2 * Math.PI / 3,
+  legl: -Math.PI,
+  legm: -2 * Math.PI / 3,
+  legn: -Math.PI / 3,
 };
 
 const LEG_MOUNT_RADIUS = 0.96;
@@ -306,7 +306,7 @@ export function sampleRobosocSpiderGait(
             )
             : 0;
   const cycleProgress = positiveModulo(
-    elapsedSeconds * WALK_CYCLES_PER_SECOND,
+    patrolProgress * WALK_CYCLES_PER_PATROL,
     1,
   );
   const legs = {} as Record<RobosocLegName, RobosocSpiderLegSample>;

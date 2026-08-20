@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   ROBOSOC_LEG_NAMES,
+  ROBOSOC_SPIDER_GAIT_COMPENSATION,
   ROBOSOC_SPIDER_JOINT_LIMITS,
   ROBOSOC_SPIDER_LEG_LENGTHS,
   ROBOSOC_TRIPOD_A,
@@ -19,6 +20,17 @@ describe("RoboSoc spider gait", () => {
     expect(ROBOSOC_SPIDER_LEG_LENGTHS.coxa).toBeCloseTo(0.42069923, 8);
     expect(ROBOSOC_SPIDER_LEG_LENGTHS.femur).toBeCloseTo(0.88059172, 8);
     expect(ROBOSOC_SPIDER_LEG_LENGTHS.tibia).toBeCloseTo(1.64862261, 8);
+  });
+
+  it("uses the six Fusion-derived leg headings", () => {
+    expect(ROBOSOC_SPIDER_GAIT_COMPENSATION).toEqual({
+      legi: 0,
+      legj: Math.PI / 3,
+      legk: 2 * Math.PI / 3,
+      legl: -Math.PI,
+      legm: -2 * Math.PI / 3,
+      legn: -Math.PI / 3,
+    });
   });
 
   it("applies commands relative to the Fusion reset rotations", () => {
@@ -95,6 +107,45 @@ describe("RoboSoc spider gait", () => {
     expect(Math.abs(before.bodyX - after.bodyX)).toBeLessThan(0.002);
     expect(Math.abs(before.bodyZ - after.bodyZ)).toBeLessThan(0.002);
     expect(Math.abs(before.bodyYaw - after.bodyYaw)).toBeLessThan(0.002);
+
+    for (const leg of ROBOSOC_LEG_NAMES) {
+      for (let axis = 0; axis < 3; axis += 1) {
+        expect(
+          Math.abs(before.legs[leg].foot[axis] - after.legs[leg].foot[axis]),
+        ).toBeLessThan(0.02);
+      }
+      expect(
+        Math.abs(before.legs[leg].angles.coxa - after.legs[leg].angles.coxa),
+      ).toBeLessThan(0.02);
+      expect(
+        Math.abs(before.legs[leg].angles.femur - after.legs[leg].angles.femur),
+      ).toBeLessThan(0.02);
+      expect(
+        Math.abs(before.legs[leg].angles.tibia - after.legs[leg].angles.tibia),
+      ).toBeLessThan(0.02);
+    }
+  });
+
+  it("returns every leg to the same gait state at the patrol boundary", () => {
+    const start = sampleRobosocSpiderGait(0);
+    const loop = sampleRobosocSpiderGait(14);
+
+    for (const leg of ROBOSOC_LEG_NAMES) {
+      expect(loop.legs[leg].phase).toBeCloseTo(start.legs[leg].phase, 10);
+      expect(loop.legs[leg].foot).toEqual(start.legs[leg].foot);
+      expect(loop.legs[leg].angles.coxa).toBeCloseTo(
+        start.legs[leg].angles.coxa,
+        10,
+      );
+      expect(loop.legs[leg].angles.femur).toBeCloseTo(
+        start.legs[leg].angles.femur,
+        10,
+      );
+      expect(loop.legs[leg].angles.tibia).toBeCloseTo(
+        start.legs[leg].angles.tibia,
+        10,
+      );
+    }
   });
 
   it("uses different inner and outer strides during a patrol turn", () => {
@@ -104,6 +155,15 @@ describe("RoboSoc spider gait", () => {
     expect(Math.abs(sample.legs.legj.foot[1])).not.toBeCloseTo(
       Math.abs(sample.legs.legn.foot[1]),
     );
+  });
+
+  it("enters and exits each U-turn without a yaw step", () => {
+    for (const boundary of [2.1, 4.9, 9.1, 11.9]) {
+      const before = sampleRobosocSpiderGait(boundary - 0.001);
+      const after = sampleRobosocSpiderGait(boundary + 0.001);
+
+      expect(Math.abs(before.bodyYaw - after.bodyYaw)).toBeLessThan(0.001);
+    }
   });
 
   it("uses a stable planted reduced-motion pose", () => {
