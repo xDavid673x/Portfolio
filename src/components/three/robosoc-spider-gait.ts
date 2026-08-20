@@ -66,7 +66,6 @@ const BODY_X_MM = 142;
 const LIFT_MM = 28;
 const PATROL_PERIOD_SECONDS = 14;
 const WALK_CYCLES_PER_PATROL = 18;
-const MAX_TURN_YAW = Math.PI;
 
 export const ROBOSOC_SPIDER_LEG_LENGTHS: LegLengths = {
   coxa: SOURCE_LENGTHS_MM.coxa * SOURCE_SCENE_SCALE,
@@ -114,6 +113,7 @@ const STRIDE = STRIDE_MM * SOURCE_TARGET_SCALE;
 const BODY_HEIGHT = BODY_HEIGHT_MM * SOURCE_TARGET_SCALE;
 const BODY_X = BODY_X_MM * SOURCE_TARGET_SCALE;
 const LIFT = LIFT_MM * SOURCE_TARGET_SCALE;
+const SHOWCASE_YAW = degreesToRadians(35);
 
 function degreesToRadians(value: number) {
   return value * Math.PI / 180;
@@ -135,11 +135,6 @@ function positiveModulo(value: number, modulus: number) {
 function cosineEase(progress: number) {
   const t = clamp(progress, 0, 1);
   return 0.5 * (1 - Math.cos(Math.PI * t));
-}
-
-function smootherStep(progress: number) {
-  const t = clamp(progress, 0, 1);
-  return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
 function quadraticBezier(
@@ -281,30 +276,9 @@ export function sampleRobosocSpiderGait(
     elapsedSeconds / PATROL_PERIOD_SECONDS,
     1,
   );
-  const turnWindow = 0.1;
-  const turnBlend =
-    Math.abs(patrolProgress - 0.25) < turnWindow
-      ? 1 - Math.abs(patrolProgress - 0.25) / turnWindow
-      : Math.abs(patrolProgress - 0.75) < turnWindow
-        ? 1 - Math.abs(patrolProgress - 0.75) / turnWindow
-        : 0;
-  const bodyX = Math.sin(patrolProgress * Math.PI * 2) * 0.88;
-  const bodyYaw =
-    patrolProgress < 0.25 - turnWindow
-      ? 0
-      : patrolProgress < 0.25 + turnWindow
-        ? MAX_TURN_YAW * smootherStep(
-          (patrolProgress - (0.25 - turnWindow)) / (turnWindow * 2),
-        )
-        : patrolProgress < 0.75 - turnWindow
-          ? MAX_TURN_YAW
-          : patrolProgress < 0.75 + turnWindow
-            ? MAX_TURN_YAW * (
-              1 - smootherStep(
-                (patrolProgress - (0.75 - turnWindow)) / (turnWindow * 2),
-              )
-            )
-            : 0;
+  const cyclePhase = patrolProgress * Math.PI * 2;
+  const bodyYaw = Math.sin(cyclePhase) * SHOWCASE_YAW;
+  const turnBlend = 0.5 + 0.5 * Math.sin(cyclePhase);
   const cycleProgress = positiveModulo(
     patrolProgress * WALK_CYCLES_PER_PATROL,
     1,
@@ -323,12 +297,9 @@ export function sampleRobosocSpiderGait(
       ? quadraticBezier(BODY_HEIGHT, BODY_HEIGHT + 2 * LIFT, BODY_HEIGHT, eased)
       : BODY_HEIGHT;
     const compensation = ROBOSOC_SPIDER_GAIT_COMPENSATION[legName];
-    const turnSide = Math.sin(compensation);
-    const turnStrideScale = 1 + turnBlend * turnSide * 0.28;
-    const footTravel = (swing ? 1 : -1) * travel * turnStrideScale;
-    const sideX = BODY_X + turnBlend * 0.12 * Math.cos(compensation);
-    const localX = sideX + Math.cos(compensation + bodyYaw) * footTravel;
-    const localY = Math.sin(compensation + bodyYaw) * footTravel;
+    const footTravel = (swing ? 1 : -1) * travel;
+    const localX = BODY_X + Math.cos(compensation) * footTravel;
+    const localY = Math.sin(compensation) * footTravel;
     const foot: Vec3Tuple = [localX, localY, height];
 
     legs[legName] = {
@@ -342,8 +313,8 @@ export function sampleRobosocSpiderGait(
 
   return {
     bodyYaw,
-    bodyX,
-    bodyZ: Math.sin(patrolProgress * Math.PI * 4) * 0.08,
+    bodyX: 0,
+    bodyZ: 0,
     cycleProgress,
     legs,
     patrolProgress,
