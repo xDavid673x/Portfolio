@@ -32,7 +32,6 @@ type JointBaselineMap = Record<
 export type RobosocSpiderModelProps = Omit<ThreeElements["group"], "children"> & {
   active?: boolean;
   modelScale?: number;
-  reducedMotion?: boolean;
 };
 
 const EMPTY_JOINT_MAP = ROBOSOC_LEG_NAMES.reduce((map, leg) => {
@@ -177,7 +176,6 @@ function RobosocSpiderFallbackModel({
 export function RobosocSpiderModel({
   active = true,
   modelScale = 1,
-  reducedMotion = false,
   ...groupProps
 }: RobosocSpiderModelProps) {
   const { scene } = useGLTF(ROBOSOC_SPIDER_MODEL_URL);
@@ -185,6 +183,7 @@ export function RobosocSpiderModel({
   const presentation = useRef<THREE.Group>(null);
   const joints = useRef<JointMap>(EMPTY_JOINT_MAP);
   const jointBaselines = useRef<JointBaselineMap>({} as JointBaselineMap);
+  const gaitTime = useRef(0);
   const stablePose = useMemo(() => createStableRobosocSpiderPose(), []);
 
   const model = useMemo(() => {
@@ -257,10 +256,11 @@ export function RobosocSpiderModel({
   }, [resolvedModelJoints, stablePose]);
 
   useFrame((state, delta) => {
-    const sample = reducedMotion || !active
-      ? stablePose
-      : sampleRobosocSpiderGait(state.clock.getElapsedTime());
     const dampingDelta = Math.min(delta, 0.05);
+    if (active) gaitTime.current += dampingDelta;
+    const sample = active
+      ? sampleRobosocSpiderGait(gaitTime.current)
+      : stablePose;
 
     if (presentation.current) {
       presentation.current.position.x = THREE.MathUtils.damp(

@@ -77,21 +77,6 @@ function canRenderWebGL() {
   }
 }
 
-function useReducedMotion() {
-  const [reducedMotion, setReducedMotion] = useState(true);
-
-  useEffect(() => {
-    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const updatePreference = () => setReducedMotion(query.matches);
-
-    updatePreference();
-    query.addEventListener("change", updatePreference);
-    return () => query.removeEventListener("change", updatePreference);
-  }, []);
-
-  return reducedMotion;
-}
-
 function SpiderCourse() {
   return (
     <group>
@@ -122,7 +107,7 @@ function SpiderCourse() {
   );
 }
 
-function CameraRig({ reducedMotion }: { reducedMotion: boolean }) {
+function CameraRig() {
   const getSceneState = useThree((state) => state.get);
   const size = useThree((state) => state.size);
 
@@ -133,7 +118,6 @@ function CameraRig({ reducedMotion }: { reducedMotion: boolean }) {
   }, [getSceneState, size.width]);
 
   useFrame((state, delta) => {
-    if (reducedMotion) return;
     const dampingDelta = Math.min(delta, 0.05);
     const targetX = (size.width < 640 ? 4.6 : 4.15) + state.pointer.x * 0.28;
     const targetY = 2.35 + state.pointer.y * 0.18;
@@ -158,16 +142,14 @@ function CameraRig({ reducedMotion }: { reducedMotion: boolean }) {
 
 function RobosocSpiderWorld({
   active,
-  reducedMotion,
 }: {
   active: boolean;
-  reducedMotion: boolean;
 }) {
   const viewport = useThree((state) => state.viewport);
   const invalidate = useThree((state) => state.invalidate);
   const scale = THREE.MathUtils.clamp(viewport.width / 7.2, 0.68, 0.96);
 
-  useEffect(() => invalidate(), [invalidate, reducedMotion, viewport.width]);
+  useEffect(() => invalidate(), [invalidate, viewport.width]);
 
   return (
     <>
@@ -197,7 +179,7 @@ function RobosocSpiderWorld({
         distance={6}
         color="#b8ff4f"
       />
-      <CameraRig reducedMotion={reducedMotion} />
+      <CameraRig />
       <group scale={scale} position={[0, scale < 0.74 ? -0.18 : 0, 0]}>
         <SpiderCourse />
         <Suspense fallback={null}>
@@ -205,7 +187,6 @@ function RobosocSpiderWorld({
             active={active}
             modelScale={4.25}
             position={[0, -0.98, 0]}
-            reducedMotion={reducedMotion}
             rotation={[0, -0.24, 0]}
             scale={0.86}
           />
@@ -325,7 +306,6 @@ export function RobosocSpiderScene({
   const [isInViewport, setIsInViewport] = useState(true);
   const [isDocumentVisible, setIsDocumentVisible] = useState(true);
   const sceneRoot = useRef<HTMLDivElement>(null);
-  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const checkFrame = window.requestAnimationFrame(() => {
@@ -354,8 +334,9 @@ export function RobosocSpiderScene({
     }
 
     const observer = new IntersectionObserver(
-      ([entry]) => setIsInViewport(entry.isIntersecting),
-      { rootMargin: "120px 0px" },
+      ([entry]) =>
+        setIsInViewport(entry.isIntersecting || entry.intersectionRatio > 0),
+      { rootMargin: "100% 0px" },
     );
     observer.observe(root);
 
@@ -379,13 +360,14 @@ export function RobosocSpiderScene({
   if (!webGLReady) return fallback;
 
   const classes = [styles.shell, className].filter(Boolean).join(" ");
-  const sceneActive = !reducedMotion && isInViewport && isDocumentVisible;
+  const sceneActive = isInViewport && isDocumentVisible;
 
   return (
     <RobosocSpiderWebGLBoundary fallback={fallback}>
       <div
         className={classes}
         data-render-mode={sceneActive ? "continuous" : "paused"}
+        data-motion-policy="always"
         ref={sceneRoot}
         role="img"
         aria-label={label}
@@ -411,7 +393,6 @@ export function RobosocSpiderScene({
         >
           <RobosocSpiderWorld
             active={sceneActive}
-            reducedMotion={reducedMotion}
           />
         </Canvas>
         <div className={styles.fallbackVignette} aria-hidden="true" />
