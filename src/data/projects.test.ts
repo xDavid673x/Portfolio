@@ -23,17 +23,30 @@ describe("project portfolio data", () => {
     expect(projectById["fitness-platform"].evidenceType).toBe("verified");
     expect(projectById["robotic-arm"].status).toBe("In development");
     expect(projectById["robotic-arm"].evidenceType).toBe("planned");
-    expect(projectById["formula-student"].status).toBe("In development");
-    expect(projectById["formula-student"].evidenceType).toBe("planned");
+    expect(projectById["robosoc-spider"].status).toBe("In development");
+    expect(projectById["robosoc-spider"].evidenceType).toBe("verified");
   });
 
-  it("links the completed group project to its public source", () => {
+  it("links the public group projects to their source", () => {
     expect(projectById["fitness-platform"].source).toEqual({
       href: "https://github.com/xDavid673x/Year1_GroupProject",
       label: "View project source",
     });
     expect(projectById["robotic-arm"].source).toBeUndefined();
-    expect(projectById["formula-student"].source).toBeUndefined();
+    expect(projectById["robosoc-spider"].source).toEqual({
+      href: "https://github.com/xDavid673x/RoboSoc_Spider",
+      label: "View project source",
+    });
+  });
+
+  it("presents the RoboSoc role without retaining the superseded project", () => {
+    expect(projectById["robosoc-spider"].context).toContain("Program Lead");
+    expect(projectById["robosoc-spider"].technologies).toEqual([
+      "Inverse kinematics",
+      "Webots",
+      "Embedded control",
+    ]);
+    expect(projectById["formula-student"]).toBeUndefined();
   });
 
   it("identifies the open-source hardware basis without overstating progress", () => {

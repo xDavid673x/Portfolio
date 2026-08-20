@@ -7,7 +7,7 @@ A design-led portfolio for a second-year Computer Science student at the Univers
 ## Featured work
 
 - **Reinforcement-learning robotic arm** — a simulation-first build based on the open-source ZERO arm's printable geometry, focused on reward design, observations, and reproducible control evaluation.
-- **Formula Student autonomy** — a modular perception, planning, and control loop built around replayable scenarios.
+- **RoboSoc spider** — an [18-joint hexapod](https://github.com/xDavid673x/RoboSoc_Spider) developed as Program Lead, connecting Fusion geometry, Webots simulation, inverse kinematics, and embedded control.
 - **Fitness platform** — a [completed first-year group project](https://github.com/xDavid673x/Year1_GroupProject) with workout tracking, social features, maps, media, leaderboards, and data-aware coaching.
 
 Ongoing work is labelled honestly and presented with its next evidence milestone rather than invented results.

@@ -1,4 +1,4 @@
-export type ProjectVisual = "robot" | "autonomy" | "fitness";
+export type ProjectVisual = "robot" | "spider" | "fitness";
 
 export type Project = {
   id: string;
@@ -44,25 +44,29 @@ export const projects: Project[] = [
     tone: "violet",
   },
   {
-    id: "formula-student",
-    title: "Building a driver that reads the track",
-    shortTitle: "Formula Student autonomy",
+    id: "robosoc-spider",
+    title: "Programming a hexapod to move as one",
+    shortTitle: "RoboSoc spider",
     status: "In development",
-    context: "Team engineering project",
+    context: "Program Lead / RoboSoc group project",
     summary:
-      "An autonomy stack that turns imperfect world signals into a dependable driving loop.",
+      "As Program Lead, I am coordinating the software that turns an 18-joint Fusion-designed hexapod into a stable, testable walking platform.",
     challenge:
-      "Connect perception, planning, and control without hiding how each layer fails.",
+      "Coordinate six legs and 18 servos into stable motion while keeping simulation, inverse kinematics, and embedded behavior aligned.",
     approach:
-      "Map the signal path, define module contracts, and create replayable scenarios before optimising algorithms.",
+      "Use the Fusion assembly as the kinematic source, model it in Webots, and drive alternating tripod steps through constrained inverse kinematics before physical calibration.",
     evidence:
-      "Planned validation: scenario logs, interface tests, a latency budget, and repeatable track-level evaluation.",
-    evidenceType: "planned",
+      "Verified in Webots: forward and backward travel, left and right turns, stop and reset behavior, motor and sensor discovery, and slope-world loading.",
+    evidenceType: "verified",
     nextMilestone:
-      "Locked interfaces and the first replayable integrated path.",
-    technologies: ["Autonomous systems", "Planning", "Controls"],
-    visual: "autonomy",
+      "Calibrate the physical servos and validate tripod-gait stability on hardware.",
+    technologies: ["Inverse kinematics", "Webots", "Embedded control"],
+    visual: "spider",
     tone: "lime",
+    source: {
+      href: "https://github.com/xDavid673x/RoboSoc_Spider",
+      label: "View project source",
+    },
   },
   {
     id: "fitness-platform",

@@ -77,7 +77,7 @@ const evidenceItems = [
 const marqueeItems = [
   "Reinforcement learning",
   "Robotics",
-  "Autonomous systems",
+  "Embedded control",
   "Full-stack engineering",
   "Human-centred software",
 ];
@@ -298,7 +298,7 @@ export function PortfolioPage() {
             <div className="hero-evidence">
               <p>
                 From full-stack delivery to reinforcement-learning robotics and
-                autonomous Formula Student systems.
+                embedded control for a six-legged RoboSoc platform.
               </p>
               <dl>
                 <div>
@@ -306,8 +306,8 @@ export function PortfolioPage() {
                   <dd>RL robotic arm</dd>
                 </div>
                 <div>
-                  <dt>Moving toward</dt>
-                  <dd>Autonomous racing</dd>
+                  <dt>Leading now</dt>
+                  <dd>RoboSoc spider</dd>
                 </div>
               </dl>
             </div>
@@ -499,7 +499,7 @@ export function PortfolioPage() {
             I am a second-year Computer Science student at the University of
             Manchester aiming toward AI and machine-learning engineering. My work
             is moving from a broad full-stack foundation into learning systems and
-            autonomy that interact with the physical world.
+            robotics that interact with the physical world.
           </p>
           <p>
             I care about reproducibility, clear interfaces, and communicating what
