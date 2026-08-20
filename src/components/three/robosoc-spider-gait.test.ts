@@ -1,0 +1,106 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  ROBOSOC_LEG_NAMES,
+  ROBOSOC_SPIDER_JOINT_LIMITS,
+  ROBOSOC_SPIDER_LEG_LENGTHS,
+  ROBOSOC_TRIPOD_A,
+  ROBOSOC_TRIPOD_B,
+  clampSpiderLegAngles,
+  createStableRobosocSpiderPose,
+  sampleRobosocSpiderGait,
+  sampleSpiderLegIk,
+  tripodPhaseDistance,
+} from "./robosoc-spider-gait";
+
+describe("RoboSoc spider gait", () => {
+  it("uses the Fusion-derived link lengths", () => {
+    expect(ROBOSOC_SPIDER_LEG_LENGTHS.coxa).toBeCloseTo(0.42069923, 8);
+    expect(ROBOSOC_SPIDER_LEG_LENGTHS.femur).toBeCloseTo(0.88059172, 8);
+    expect(ROBOSOC_SPIDER_LEG_LENGTHS.tibia).toBeCloseTo(1.64862261, 8);
+  });
+
+  it("keeps the real tripod groups half a cycle apart", () => {
+    for (const time of [0, 0.19, 1.4, 7.2, 13.99]) {
+      const sample = sampleRobosocSpiderGait(time);
+
+      for (const leg of ROBOSOC_TRIPOD_A) {
+        expect(sample.legs[leg].tripod).toBe("A");
+        expect(sample.legs[leg].phase).toBeCloseTo(sample.legs.legi.phase);
+      }
+      for (const leg of ROBOSOC_TRIPOD_B) {
+        expect(sample.legs[leg].tripod).toBe("B");
+        expect(sample.legs[leg].phase).toBeCloseTo(sample.legs.legj.phase);
+      }
+      expect(tripodPhaseDistance(sample)).toBeCloseTo(0.5);
+      expect(sample.legs.legi.planted).not.toBe(sample.legs.legj.planted);
+    }
+  });
+
+  it("returns finite IK angles for all sampled gait targets", () => {
+    for (const time of [0, 0.35, 1.2, 4.7, 8.1, 13.4]) {
+      const sample = sampleRobosocSpiderGait(time);
+
+      for (const leg of ROBOSOC_LEG_NAMES) {
+        const { angles, foot } = sample.legs[leg];
+        expect(foot.every(Number.isFinite)).toBe(true);
+        expect(Number.isFinite(angles.coxa)).toBe(true);
+        expect(Number.isFinite(angles.femur)).toBe(true);
+        expect(Number.isFinite(angles.tibia)).toBe(true);
+      }
+    }
+  });
+
+  it("clamps command angles to mechanical limits", () => {
+    const clamped = clampSpiderLegAngles({
+      coxa: Math.PI,
+      femur: -Math.PI,
+      tibia: Math.PI,
+    });
+
+    expect(clamped.coxa).toBe(ROBOSOC_SPIDER_JOINT_LIMITS.coxa[1]);
+    expect(clamped.femur).toBe(ROBOSOC_SPIDER_JOINT_LIMITS.femur[0]);
+    expect(clamped.tibia).toBe(ROBOSOC_SPIDER_JOINT_LIMITS.tibia[1]);
+  });
+
+  it("keeps unreachable IK targets finite and inside limits", () => {
+    const angles = sampleSpiderLegIk([80, -80, -80]);
+
+    expect(Number.isFinite(angles.coxa)).toBe(true);
+    expect(Number.isFinite(angles.femur)).toBe(true);
+    expect(Number.isFinite(angles.tibia)).toBe(true);
+    expect(angles.coxa).toBeGreaterThanOrEqual(ROBOSOC_SPIDER_JOINT_LIMITS.coxa[0]);
+    expect(angles.coxa).toBeLessThanOrEqual(ROBOSOC_SPIDER_JOINT_LIMITS.coxa[1]);
+    expect(angles.femur).toBeGreaterThanOrEqual(ROBOSOC_SPIDER_JOINT_LIMITS.femur[0]);
+    expect(angles.femur).toBeLessThanOrEqual(ROBOSOC_SPIDER_JOINT_LIMITS.femur[1]);
+    expect(angles.tibia).toBeGreaterThanOrEqual(ROBOSOC_SPIDER_JOINT_LIMITS.tibia[0]);
+    expect(angles.tibia).toBeLessThanOrEqual(ROBOSOC_SPIDER_JOINT_LIMITS.tibia[1]);
+  });
+
+  it("loops the patrol path without a position or yaw pop", () => {
+    const before = sampleRobosocSpiderGait(13.999);
+    const after = sampleRobosocSpiderGait(14.001);
+
+    expect(Math.abs(before.bodyX - after.bodyX)).toBeLessThan(0.002);
+    expect(Math.abs(before.bodyZ - after.bodyZ)).toBeLessThan(0.002);
+    expect(Math.abs(before.bodyYaw - after.bodyYaw)).toBeLessThan(0.002);
+  });
+
+  it("uses different inner and outer strides during a patrol turn", () => {
+    const sample = sampleRobosocSpiderGait(3.5);
+
+    expect(sample.turnBlend).toBeCloseTo(1);
+    expect(Math.abs(sample.legs.legj.foot[1])).not.toBeCloseTo(
+      Math.abs(sample.legs.legn.foot[1]),
+    );
+  });
+
+  it("uses a stable planted reduced-motion pose", () => {
+    const pose = createStableRobosocSpiderPose();
+
+    for (const leg of ROBOSOC_LEG_NAMES) {
+      expect(pose.legs[leg].planted).toBe(true);
+      expect(pose.legs[leg].angles.tibia).toBeGreaterThan(0);
+    }
+  });
+});
