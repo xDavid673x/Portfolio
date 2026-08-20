@@ -24,6 +24,8 @@ export type RobosocSpiderLegAngles = {
   tibia: number;
 };
 
+export type RobosocSpiderJointRole = keyof RobosocSpiderLegAngles;
+
 export type RobosocSpiderLegSample = {
   angles: RobosocSpiderLegAngles;
   foot: Vec3Tuple;
@@ -79,12 +81,21 @@ export const ROBOSOC_SPIDER_STAND_ANGLES: RobosocSpiderLegAngles = {
 };
 
 export const ROBOSOC_SPIDER_JOINT_LIMITS: Record<
-  keyof RobosocSpiderLegAngles,
+  RobosocSpiderJointRole,
   JointLimit
 > = {
   coxa: [degreesToRadians(-90), degreesToRadians(90)],
   femur: [degreesToRadians(-90), degreesToRadians(90)],
   tibia: [0, degreesToRadians(130)],
+};
+
+export const ROBOSOC_SPIDER_JOINT_SIGNS: Record<
+  RobosocSpiderJointRole,
+  number
+> = {
+  coxa: -1,
+  femur: 1,
+  tibia: -1,
 };
 
 export const ROBOSOC_SPIDER_GAIT_COMPENSATION: Record<RobosocLegName, number> = {
@@ -202,6 +213,14 @@ export function clampSpiderLegAngles(
       ROBOSOC_SPIDER_JOINT_LIMITS.tibia[1],
     ),
   };
+}
+
+export function getRobosocSpiderJointRotation(
+  baseline: number,
+  role: RobosocSpiderJointRole,
+  commandAngle: number,
+) {
+  return baseline + commandAngle * ROBOSOC_SPIDER_JOINT_SIGNS[role];
 }
 
 export function sampleSpiderLegIk(target: Vec3Tuple): RobosocSpiderLegAngles {

@@ -8,6 +8,7 @@ import {
   ROBOSOC_TRIPOD_B,
   clampSpiderLegAngles,
   createStableRobosocSpiderPose,
+  getRobosocSpiderJointRotation,
   sampleRobosocSpiderGait,
   sampleSpiderLegIk,
   tripodPhaseDistance,
@@ -18,6 +19,16 @@ describe("RoboSoc spider gait", () => {
     expect(ROBOSOC_SPIDER_LEG_LENGTHS.coxa).toBeCloseTo(0.42069923, 8);
     expect(ROBOSOC_SPIDER_LEG_LENGTHS.femur).toBeCloseTo(0.88059172, 8);
     expect(ROBOSOC_SPIDER_LEG_LENGTHS.tibia).toBeCloseTo(1.64862261, 8);
+  });
+
+  it("applies commands relative to the Fusion reset rotations", () => {
+    expect(getRobosocSpiderJointRotation(0, "coxa", 0)).toBeCloseTo(0);
+    expect(
+      getRobosocSpiderJointRotation(-28 * Math.PI / 180, "femur", 28 * Math.PI / 180),
+    ).toBeCloseTo(0);
+    expect(
+      getRobosocSpiderJointRotation(115 * Math.PI / 180, "tibia", 115 * Math.PI / 180),
+    ).toBeCloseTo(0);
   });
 
   it("keeps the real tripod groups half a cycle apart", () => {

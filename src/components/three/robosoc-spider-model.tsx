@@ -10,18 +10,24 @@ import {
   ROBOSOC_SPIDER_MODEL_URL,
   createStableRobosocSpiderPose,
   forwardSpiderLegKinematics,
+  getRobosocSpiderJointRotation,
   getSpiderLegMount,
   sampleRobosocSpiderGait,
   type RobosocLegName,
   type RobosocSpiderGaitSample,
-  type RobosocSpiderLegAngles,
+  type RobosocSpiderJointRole,
 } from "./robosoc-spider-gait";
 
-type JointRole = keyof RobosocSpiderLegAngles;
+type JointRole = RobosocSpiderJointRole;
 
 type LegJointMap = Partial<Record<JointRole, THREE.Object3D>>;
 
 type JointMap = Record<RobosocLegName, LegJointMap>;
+
+type JointBaselineMap = Record<
+  RobosocLegName,
+  Partial<Record<JointRole, number>>
+>;
 
 export type RobosocSpiderModelProps = Omit<ThreeElements["group"], "children"> & {
   active?: boolean;
@@ -39,12 +45,6 @@ const JOINT_AXES: Record<JointRole, "x" | "y" | "z"> = {
   tibia: "z",
 };
 
-const JOINT_SIGNS: Record<JointRole, number> = {
-  coxa: -1,
-  femur: 1,
-  tibia: -1,
-};
-
 function findJoint(model: THREE.Object3D, leg: RobosocLegName, role: JointRole) {
   const candidates = [
     `${leg}_${role}_joint`,
@@ -60,18 +60,34 @@ function findJoint(model: THREE.Object3D, leg: RobosocLegName, role: JointRole) 
   return undefined;
 }
 
-function setObjectAngle(object: THREE.Object3D, role: JointRole, angle: number) {
-  object.rotation[JOINT_AXES[role]] = angle * JOINT_SIGNS[role];
+function setObjectAngle(
+  object: THREE.Object3D,
+  baseline: number,
+  role: JointRole,
+  angle: number,
+) {
+  object.rotation[JOINT_AXES[role]] = getRobosocSpiderJointRotation(
+    baseline,
+    role,
+    angle,
+  );
 }
 
-function applyPoseToJoints(joints: JointMap, sample: RobosocSpiderGaitSample) {
+function applyPoseToJoints(
+  joints: JointMap,
+  baselines: JointBaselineMap,
+  sample: RobosocSpiderGaitSample,
+) {
   for (const leg of ROBOSOC_LEG_NAMES) {
     const legJoints = joints[leg];
     const angles = sample.legs[leg].angles;
 
     for (const role of ["coxa", "femur", "tibia"] as const) {
       const joint = legJoints[role];
-      if (joint) setObjectAngle(joint, role, angles[role]);
+      const baseline = baselines[leg][role];
+      if (joint && baseline !== undefined) {
+        setObjectAngle(joint, baseline, role, angles[role]);
+      }
     }
   }
 }
@@ -151,6 +167,7 @@ export function RobosocSpiderModel({
   const root = useRef<THREE.Group>(null);
   const presentation = useRef<THREE.Group>(null);
   const joints = useRef<JointMap>(EMPTY_JOINT_MAP);
+  const jointBaselines = useRef<JointBaselineMap>({} as JointBaselineMap);
   const stablePose = useMemo(() => createStableRobosocSpiderPose(), []);
 
   const model = useMemo(() => {
@@ -182,7 +199,16 @@ export function RobosocSpiderModel({
         Object.values(nextJoints[leg]).every(Boolean),
       );
 
-    return { hasJoints, joints: nextJoints };
+    const baselines = ROBOSOC_LEG_NAMES.reduce((map, leg) => {
+      map[leg] = {};
+      for (const role of ["coxa", "femur", "tibia"] as const) {
+        const joint = nextJoints[leg][role];
+        if (joint) map[leg][role] = joint.rotation[JOINT_AXES[role]];
+      }
+      return map;
+    }, {} as JointBaselineMap);
+
+    return { baselines, hasJoints, joints: nextJoints };
   }, [model]);
 
   useEffect(
@@ -200,10 +226,16 @@ export function RobosocSpiderModel({
 
   useLayoutEffect(() => {
     joints.current = resolvedModelJoints.joints;
-    applyPoseToJoints(resolvedModelJoints.joints, stablePose);
+    jointBaselines.current = resolvedModelJoints.baselines;
+    applyPoseToJoints(
+      resolvedModelJoints.joints,
+      resolvedModelJoints.baselines,
+      stablePose,
+    );
 
     return () => {
       joints.current = EMPTY_JOINT_MAP;
+      jointBaselines.current = {} as JointBaselineMap;
     };
   }, [resolvedModelJoints, stablePose]);
 
@@ -240,11 +272,12 @@ export function RobosocSpiderModel({
 
       for (const role of ["coxa", "femur", "tibia"] as const) {
         const joint = legJoints[role];
-        if (!joint) continue;
+        const baseline = jointBaselines.current[leg]?.[role];
+        if (!joint || baseline === undefined) continue;
         const axis = JOINT_AXES[role];
         joint.rotation[axis] = THREE.MathUtils.damp(
           joint.rotation[axis],
-          angles[role] * JOINT_SIGNS[role],
+          getRobosocSpiderJointRotation(baseline, role, angles[role]),
           10.5,
           dampingDelta,
         );
