@@ -2,12 +2,13 @@
 
 import { Line, useGLTF } from "@react-three/drei";
 import { useFrame, type ThreeElements } from "@react-three/fiber";
-import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { createRef, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 
 import {
   ROBOSOC_LEG_NAMES,
   ROBOSOC_SPIDER_MODEL_URL,
+  ROBOSOC_TRIPOD_A,
   createStableRobosocSpiderPose,
   forwardSpiderLegKinematics,
   getRobosocSpiderJointRotation,
@@ -16,6 +17,7 @@ import {
   type RobosocLegName,
   type RobosocSpiderGaitSample,
   type RobosocSpiderJointRole,
+  type Vec3Tuple,
 } from "./robosoc-spider-gait";
 
 type JointRole = RobosocSpiderJointRole;
@@ -31,7 +33,9 @@ type JointBaselineMap = Record<
 
 export type RobosocSpiderModelProps = Omit<ThreeElements["group"], "children"> & {
   active?: boolean;
+  modelScale?: number;
   reducedMotion?: boolean;
+  showKinematicOverlay?: boolean;
 };
 
 const EMPTY_JOINT_MAP = ROBOSOC_LEG_NAMES.reduce((map, leg) => {
@@ -44,6 +48,21 @@ const JOINT_AXES: Record<JointRole, "x" | "y" | "z"> = {
   femur: "z",
   tibia: "z",
 };
+
+function cloneMaterialForDarkStage(material: THREE.Material) {
+  const clone = material.clone();
+
+  if (clone instanceof THREE.MeshStandardMaterial) {
+    const hsl = clone.color.getHSL({ h: 0, s: 0, l: 0 });
+    clone.color.setHSL(hsl.h, Math.min(hsl.s, 0.24), Math.max(hsl.l, 0.34));
+    clone.emissive.copy(clone.color).multiplyScalar(0.12);
+    clone.emissiveIntensity = 0.32;
+    clone.metalness = Math.min(clone.metalness, 0.45);
+    clone.roughness = Math.max(clone.roughness, 0.42);
+  }
+
+  return clone;
+}
 
 function findJoint(model: THREE.Object3D, leg: RobosocLegName, role: JointRole) {
   const candidates = [
@@ -90,6 +109,145 @@ function applyPoseToJoints(
       }
     }
   }
+}
+
+function transformLegPoint(
+  leg: RobosocLegName,
+  point: Vec3Tuple,
+) {
+  const mount = getSpiderLegMount(leg);
+  const heading = Math.atan2(mount[2], mount[0]);
+  const [x, y, z] = point;
+
+  return new THREE.Vector3(
+    mount[0] + x * Math.cos(heading) - y * Math.sin(heading),
+    mount[1] - z,
+    mount[2] + x * Math.sin(heading) + y * Math.cos(heading),
+  );
+}
+
+function KinematicSpiderOverlay({
+  active,
+  reducedMotion,
+  stablePose,
+}: {
+  active: boolean;
+  reducedMotion: boolean;
+  stablePose: RobosocSpiderGaitSample;
+}) {
+  const body = useRef<THREE.Mesh>(null);
+  const core = useRef<THREE.Mesh>(null);
+  const legLines = useMemo(
+    () => ROBOSOC_LEG_NAMES.map(() => createRef<THREE.Line>()),
+    [],
+  );
+  const lineObjects = useMemo(
+    () => ROBOSOC_LEG_NAMES.map(() => new THREE.Line(
+      new THREE.BufferGeometry(),
+      new THREE.LineBasicMaterial({
+        color: "#7d8d8b",
+        linewidth: 2,
+        transparent: true,
+        opacity: 0.86,
+      }),
+    )),
+    [],
+  );
+  const footMarkers = useMemo(
+    () => ROBOSOC_LEG_NAMES.map(() => createRef<THREE.Mesh>()),
+    [],
+  );
+
+  useFrame((state, delta) => {
+    const sample = reducedMotion || !active
+      ? stablePose
+      : sampleRobosocSpiderGait(state.clock.getElapsedTime());
+    const dampingDelta = Math.min(delta, 0.05);
+
+    if (body.current) {
+      body.current.rotation.y = THREE.MathUtils.damp(
+        body.current.rotation.y,
+        sample.bodyYaw * 0.18,
+        6,
+        dampingDelta,
+      );
+    }
+
+    if (core.current) {
+      core.current.position.y = THREE.MathUtils.damp(
+        core.current.position.y,
+        0.25 + Math.sin(sample.cycleProgress * Math.PI * 2) * 0.025,
+        7,
+        dampingDelta,
+      );
+    }
+
+    ROBOSOC_LEG_NAMES.forEach((leg, index) => {
+      const points = forwardSpiderLegKinematics(sample.legs[leg].angles).map(
+        (point) => transformLegPoint(leg, point),
+      );
+      const line = legLines[index].current;
+      if (line) {
+        line.geometry.dispose();
+        line.geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const material = line.material as THREE.LineBasicMaterial;
+        material.color.set(sample.legs[leg].planted ? "#7d8d8b" : "#b8ff4f");
+        material.opacity = sample.legs[leg].planted ? 0.72 : 1;
+      }
+
+      const marker = footMarkers[index].current;
+      const foot = points[points.length - 1];
+      if (marker && foot) {
+        marker.position.lerp(foot, 1 - Math.exp(-14 * dampingDelta));
+        const material = marker.material as THREE.MeshStandardMaterial;
+        material.color.set(sample.legs[leg].planted ? "#617170" : "#b8ff4f");
+        material.emissive.set(sample.legs[leg].planted ? "#0a1010" : "#263f05");
+      }
+    });
+  });
+
+  return (
+    <group scale={0.82} position={[0, -0.08, 0]}>
+      <mesh ref={body} castShadow receiveShadow position={[0, 0.24, 0]}>
+        <cylinderGeometry args={[0.78, 0.92, 0.24, 6]} />
+        <meshStandardMaterial
+          color="#30393b"
+          emissive="#081112"
+          emissiveIntensity={0.28}
+          metalness={0.68}
+          roughness={0.34}
+        />
+      </mesh>
+      <mesh ref={core} position={[0, 0.25, 0]}>
+        <sphereGeometry args={[0.16, 18, 12]} />
+        <meshStandardMaterial
+          color="#b8ff4f"
+          emissive="#b8ff4f"
+          emissiveIntensity={0.82}
+          metalness={0.18}
+          roughness={0.38}
+        />
+      </mesh>
+      {ROBOSOC_LEG_NAMES.map((leg, index) => {
+        const tripod = (ROBOSOC_TRIPOD_A as readonly RobosocLegName[]).includes(leg) ? "A" : "B";
+        return (
+          <group key={leg}>
+            <primitive ref={legLines[index]} object={lineObjects[index]} />
+            <mesh ref={footMarkers[index]}>
+              <sphereGeometry args={[0.045, 12, 10]} />
+              <meshStandardMaterial
+                color={tripod === "A" ? "#b8ff4f" : "#617170"}
+                emissive={tripod === "A" ? "#263f05" : "#0a1010"}
+                emissiveIntensity={0.42}
+                metalness={0.32}
+                roughness={0.42}
+              />
+            </mesh>
+          </group>
+        );
+      })}
+    </group>
+  );
 }
 
 function RobosocSpiderFallbackModel({
@@ -160,7 +318,9 @@ function RobosocSpiderFallbackModel({
 
 export function RobosocSpiderModel({
   active = true,
+  modelScale = 1,
   reducedMotion = false,
+  showKinematicOverlay = false,
   ...groupProps
 }: RobosocSpiderModelProps) {
   const { scene } = useGLTF(ROBOSOC_SPIDER_MODEL_URL);
@@ -178,9 +338,9 @@ export function RobosocSpiderModel({
       object.receiveShadow = true;
       const material = object.material;
       if (Array.isArray(material)) {
-        object.material = material.map((entry) => entry.clone());
+        object.material = material.map(cloneMaterialForDarkStage);
       } else {
-        object.material = material.clone();
+        object.material = cloneMaterialForDarkStage(material);
       }
     });
     return clone;
@@ -288,7 +448,14 @@ export function RobosocSpiderModel({
   return (
     <group ref={root} {...groupProps}>
       <group ref={presentation}>
-        <primitive object={model} />
+        <primitive object={model} scale={modelScale} />
+        {showKinematicOverlay && (
+          <KinematicSpiderOverlay
+            active={active}
+            reducedMotion={reducedMotion}
+            stablePose={stablePose}
+          />
+        )}
         {!resolvedModelJoints.hasJoints && (
           <RobosocSpiderFallbackModel sample={stablePose} />
         )}

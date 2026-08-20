@@ -106,7 +106,7 @@ function SpiderCourse() {
         />
       </mesh>
       <gridHelper args={[6.8, 14, "#314143", "#1a2527"]} position={[0, -1.16, 0]} />
-      {[-1.15, 1.15].map((x) => (
+      {[-2.25, 2.25].map((x) => (
         <mesh key={x} position={[x, -1.08, -1.72]}>
           <boxGeometry args={[0.18, 0.1, 0.42]} />
           <meshStandardMaterial
@@ -129,7 +129,7 @@ function CameraRig({ reducedMotion }: { reducedMotion: boolean }) {
   useEffect(() => {
     const camera = getSceneState().camera;
     camera.position.set(size.width < 640 ? 4.6 : 4.15, 2.35, size.width < 640 ? 6.4 : 5.65);
-    camera.lookAt(0, -0.18, 0);
+    camera.lookAt(0, -0.55, 0);
   }, [getSceneState, size.width]);
 
   useFrame((state, delta) => {
@@ -150,7 +150,7 @@ function CameraRig({ reducedMotion }: { reducedMotion: boolean }) {
       2.6,
       dampingDelta,
     );
-    state.camera.lookAt(0, -0.18, 0);
+    state.camera.lookAt(0, -0.55, 0);
   });
 
   return null;
@@ -180,14 +180,14 @@ function RobosocSpiderWorld({
       />
       <directionalLight
         position={[3.6, 5.8, 4.2]}
-        intensity={3.2}
+        intensity={4.6}
         color="#f4ffe8"
       />
       <spotLight
         position={[-3.8, 4.2, 3.8]}
         angle={0.54}
         penumbra={0.82}
-        intensity={38}
+        intensity={52}
         distance={11}
         color="#a7f5e0"
       />
@@ -203,10 +203,12 @@ function RobosocSpiderWorld({
         <Suspense fallback={null}>
           <RobosocSpiderModel
             active={active}
-            position={[0, -0.72, 0]}
+            modelScale={4.25}
+            position={[0, -0.98, 0]}
             reducedMotion={reducedMotion}
             rotation={[0, -0.24, 0]}
-            scale={0.82}
+            scale={0.86}
+            showKinematicOverlay
           />
         </Suspense>
       </group>
