@@ -208,7 +208,6 @@ function RobosocSpiderWorld({
             reducedMotion={reducedMotion}
             rotation={[0, -0.24, 0]}
             scale={0.86}
-            showKinematicOverlay
           />
         </Suspense>
       </group>
