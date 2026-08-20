@@ -62,9 +62,9 @@ const SOURCE_LENGTHS_MM = {
 const SOURCE_SCENE_SCALE = 0.001;
 const STRIDE_MM = 132;
 const WALK_STEP_COUNT = 48;
-const BODY_HEIGHT_MM = -118;
+const BODY_HEIGHT_MM = -150;
 const BODY_X_MM = 142;
-const LIFT_MM = 28;
+const LIFT_MM = 20;
 const PATROL_PERIOD_SECONDS = 14;
 const WALK_CYCLES_PER_PATROL = 18;
 
@@ -79,6 +79,8 @@ export const ROBOSOC_SPIDER_STAND_ANGLES: RobosocSpiderLegAngles = {
   femur: degreesToRadians(28),
   tibia: degreesToRadians(115),
 };
+
+const ROBOSOC_SPIDER_JOINT_RESET_ANGLES: RobosocSpiderLegAngles = ROBOSOC_SPIDER_STAND_ANGLES;
 
 export const ROBOSOC_SPIDER_JOINT_LIMITS: Record<
   RobosocSpiderJointRole,
@@ -216,7 +218,9 @@ export function getRobosocSpiderJointRotation(
   role: RobosocSpiderJointRole,
   commandAngle: number,
 ) {
-  return baseline + commandAngle * ROBOSOC_SPIDER_JOINT_SIGNS[role];
+  return baseline + (
+    commandAngle - ROBOSOC_SPIDER_JOINT_RESET_ANGLES[role]
+  ) * ROBOSOC_SPIDER_JOINT_SIGNS[role];
 }
 
 export function sampleSpiderLegIk(target: Vec3Tuple): RobosocSpiderLegAngles {
