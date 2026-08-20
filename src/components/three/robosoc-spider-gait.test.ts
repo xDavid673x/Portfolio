@@ -19,9 +19,9 @@ describe("RoboSoc spider gait", () => {
   const showcaseYaw = 35 * Math.PI / 180;
 
   it("uses the Fusion-derived link lengths", () => {
-    expect(ROBOSOC_SPIDER_LEG_LENGTHS.coxa).toBeCloseTo(0.42069923, 8);
-    expect(ROBOSOC_SPIDER_LEG_LENGTHS.femur).toBeCloseTo(0.88059172, 8);
-    expect(ROBOSOC_SPIDER_LEG_LENGTHS.tibia).toBeCloseTo(1.64862261, 8);
+    expect(ROBOSOC_SPIDER_LEG_LENGTHS.coxa).toBeCloseTo(0.042069923, 8);
+    expect(ROBOSOC_SPIDER_LEG_LENGTHS.femur).toBeCloseTo(0.088059172, 8);
+    expect(ROBOSOC_SPIDER_LEG_LENGTHS.tibia).toBeCloseTo(0.164862261, 8);
   });
 
   it("uses the six Fusion-derived leg headings", () => {
@@ -82,6 +82,9 @@ describe("RoboSoc spider gait", () => {
 
       expect(sample.bodyX).toBe(0);
       expect(sample.bodyZ).toBe(0);
+      for (const leg of ROBOSOC_LEG_NAMES) {
+        expect(sample.legs[leg].angles.coxa).toBeCloseTo(0, 8);
+      }
     }
   });
 

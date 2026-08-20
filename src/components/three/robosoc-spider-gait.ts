@@ -58,7 +58,8 @@ const SOURCE_LENGTHS_MM = {
   tibia: 164.862261,
 } as const;
 
-const SOURCE_SCENE_SCALE = 0.01;
+// The committed GLB is exported from the Fusion manifest in metres.
+const SOURCE_SCENE_SCALE = 0.001;
 const STRIDE_MM = 132;
 const WALK_STEP_COUNT = 48;
 const BODY_HEIGHT_MM = -118;
@@ -106,8 +107,8 @@ export const ROBOSOC_SPIDER_GAIT_COMPENSATION: Record<RobosocLegName, number> = 
   legn: -Math.PI / 3,
 };
 
-const LEG_MOUNT_RADIUS = 0.96;
-const LEG_MOUNT_Z = 0.12;
+const LEG_MOUNT_RADIUS = 0.096;
+const LEG_MOUNT_Z = 0.012;
 const SOURCE_TARGET_SCALE = SOURCE_SCENE_SCALE;
 const STRIDE = STRIDE_MM * SOURCE_TARGET_SCALE;
 const BODY_HEIGHT = BODY_HEIGHT_MM * SOURCE_TARGET_SCALE;
@@ -296,11 +297,10 @@ export function sampleRobosocSpiderGait(
     const height = swing
       ? quadraticBezier(BODY_HEIGHT, BODY_HEIGHT + 2 * LIFT, BODY_HEIGHT, eased)
       : BODY_HEIGHT;
-    const compensation = ROBOSOC_SPIDER_GAIT_COMPENSATION[legName];
     const footTravel = (swing ? 1 : -1) * travel;
-    const localX = BODY_X + Math.cos(compensation) * footTravel;
-    const localY = Math.sin(compensation) * footTravel;
-    const foot: Vec3Tuple = [localX, localY, height];
+    // Solve in the leg's own Fusion frame. The GLB leg root already carries
+    // each radial heading, so the IK target must stay local to that root.
+    const foot: Vec3Tuple = [BODY_X + footTravel, 0, height];
 
     legs[legName] = {
       angles: solveSpiderLegIk(foot),
