@@ -1171,9 +1171,6 @@
 
 .fitnessVisual {
   --accent: #f07a52;
-  --accent-rgb: 240, 122, 82;
-  --fitness-paper: #d9e2e6;
-  --fitness-blue: #668397;
   aspect-ratio: auto;
   border: 0;
   border-radius: 0;
@@ -1236,7 +1233,7 @@
 .fitnessPhoto {
   background:
     linear-gradient(rgba(12, 20, 24, 0.12), rgba(12, 20, 24, 0.12)),
-    var(--fitness-photo-url) 38% center / cover no-repeat,
+    var(--fitness-photo-url) center / cover no-repeat,
     #293840;
   filter: saturate(0.92) contrast(1.03) brightness(0.96);
   transform: scale(1.02);
@@ -1250,8 +1247,8 @@
 }
 
 /* The supplied Motiv8 capture already contains its own navigation and hero copy.
-   Keep the existing stage structure and telemetry, but let the source capture
-   carry the visual story without duplicating its headline over the image. */
+   Keep the existing stage structure and breathing motion while letting the
+   source capture carry the visual story without duplicate overlay copy. */
 .fitnessBrandLockup,
 .fitnessHeroCopy,
 .fitnessStageFooter {
@@ -1294,9 +1291,6 @@
 
 .fitnessHeroCopy span,
 .fitnessHeroCopy > i,
-.fitnessSignalHeading,
-.fitnessFeatureList,
-.fitnessSignalChart > span,
 .fitnessStageFooter {
   font-size: clamp(0.36rem, 0.58vw, 0.5rem);
   letter-spacing: 0.12em;
@@ -1341,110 +1335,6 @@
 .fitnessStageFooter span:last-child {
   color: var(--accent);
   font-weight: 700;
-}
-
-.fitnessSignal {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 3;
-  width: clamp(8.5rem, 27%, 10.5rem);
-  padding: clamp(0.8rem, 1.8vw, 1.2rem);
-  border-left: 1px solid rgba(226, 237, 240, 0.2);
-  background: rgba(9, 11, 9, 0.7);
-  color: #e6edf0;
-  backdrop-filter: blur(0.45rem);
-}
-
-.fitnessSignalHeading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  padding-bottom: 0.65rem;
-  border-bottom: 1px solid rgba(226, 237, 240, 0.18);
-}
-
-.fitnessSignalHeading span {
-  color: rgba(226, 237, 240, 0.72);
-}
-
-.fitnessSignalHeading strong {
-  color: var(--accent);
-  font-weight: 700;
-}
-
-.fitnessFeatureList {
-  display: grid;
-  gap: 0.45rem;
-  margin-top: 0.8rem;
-}
-
-.fitnessFeatureList div {
-  display: grid;
-  grid-template-columns: 1.4rem 1fr 2.4rem;
-  gap: 0.4rem;
-  align-items: center;
-  padding-bottom: 0.42rem;
-  border-bottom: 1px solid rgba(226, 237, 240, 0.13);
-}
-
-.fitnessFeatureList span {
-  color: rgba(226, 237, 240, 0.48);
-}
-
-.fitnessFeatureList b {
-  overflow: hidden;
-  color: rgba(226, 237, 240, 0.9);
-  font-weight: 500;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.fitnessFeatureList i {
-  height: 0.22rem;
-  background: rgba(var(--accent-rgb), 0.18);
-}
-
-.fitnessFeatureList div:nth-child(1) i { width: 88%; background: var(--accent); }
-.fitnessFeatureList div:nth-child(2) i { width: 70%; background: var(--fitness-blue); }
-.fitnessFeatureList div:nth-child(3) i { width: 54%; background: var(--fitness-paper); }
-.fitnessFeatureList div:nth-child(4) i { width: 78%; background: var(--accent); }
-
-.fitnessSignalChart {
-  margin-top: 0.85rem;
-  padding-top: 0.65rem;
-  border-top: 1px solid rgba(226, 237, 240, 0.16);
-}
-
-.fitnessSignalChart > span {
-  display: block;
-  color: rgba(226, 237, 240, 0.42);
-}
-
-.fitnessSignalChart svg {
-  display: block;
-  width: 100%;
-  height: clamp(2.4rem, 6vw, 3.2rem);
-  margin-top: 0.45rem;
-  overflow: visible;
-}
-
-.fitnessSignalChart path:first-child {
-  fill: none;
-  stroke: rgba(226, 237, 240, 0.12);
-  stroke-width: 1;
-}
-
-.fitnessSignalChart path:last-child {
-  fill: none;
-  stroke: var(--accent);
-  stroke-linecap: round;
-  stroke-width: 2;
-  stroke-dasharray: 4 5;
-  vector-effect: non-scaling-stroke;
-  animation: signalTrace 3.2s linear infinite;
 }
 
 @keyframes pathTravel {
@@ -1561,10 +1451,6 @@
     display: none;
   }
 
-  .fitnessSignal {
-    width: clamp(7.8rem, 29%, 9rem);
-  }
-
   .fitnessHeroCopy {
     right: calc(clamp(7.8rem, 29%, 9rem) + 0.9rem);
   }
@@ -1577,9 +1463,6 @@
     right: calc(clamp(7.8rem, 29%, 9rem) + 0.9rem);
   }
 
-  .fitnessSignalChart {
-    margin-top: 0.65rem;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

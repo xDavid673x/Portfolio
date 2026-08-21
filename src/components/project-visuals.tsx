@@ -423,25 +423,6 @@ export function FitnessPlatformVisual({ className }: { className?: string }) {
           </div>
         </div>
 
-        <aside className={styles.fitnessSignal}>
-          <div className={styles.fitnessSignalHeading}>
-            <span>PRODUCT SURFACE</span>
-            <strong>04 MODULES</strong>
-          </div>
-          <div className={styles.fitnessFeatureList}>
-            <div><span>01</span><b>WORKOUTS</b><i /></div>
-            <div><span>02</span><b>LEADERBOARDS</b><i /></div>
-            <div><span>03</span><b>GYM LOCATOR</b><i /></div>
-            <div><span>04</span><b>AI COACHING</b><i /></div>
-          </div>
-          <div className={styles.fitnessSignalChart}>
-            <span>CONNECTED JOURNEY</span>
-            <svg viewBox="0 0 150 46" preserveAspectRatio="none">
-              <path d="M0 34H150M0 18H150" />
-              <path d="M0 37C14 35 18 24 31 27C46 31 49 11 64 16C80 22 83 28 96 20C111 11 118 18 128 10C138 4 144 7 150 3" />
-            </svg>
-          </div>
-        </aside>
       </div>
     </figure>
   );
