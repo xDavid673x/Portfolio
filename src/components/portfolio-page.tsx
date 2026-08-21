@@ -222,7 +222,7 @@ export function PortfolioPage() {
     setEvidenceIndex((current) => (current + 1) % evidenceItems.length);
 
   const publicAssetStyles = {
-    "--fitness-photo-url": `url("${assetPath("/images/gym-platform.webp")}")`,
+    "--fitness-photo-url": `url("${assetPath("/images/motiv8-homepage.jpeg")}")`,
     "--motiv8-logo-url": `url("${assetPath("/images/motiv8-logo.png")}")`,
   } as CSSProperties;
 

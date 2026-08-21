@@ -1236,17 +1236,26 @@
 .fitnessPhoto {
   background:
     linear-gradient(rgba(12, 20, 24, 0.12), rgba(12, 20, 24, 0.12)),
-    var(--fitness-photo-url) center / cover no-repeat,
+    var(--fitness-photo-url) 38% center / cover no-repeat,
     #293840;
-  filter: saturate(0.58) contrast(1.1) brightness(0.82);
+  filter: saturate(0.92) contrast(1.03) brightness(0.96);
   transform: scale(1.02);
   animation: imageBreathe 9s ease-in-out infinite alternate;
 }
 
 .fitnessPhotoWash {
   background:
-    linear-gradient(90deg, rgba(9, 16, 20, 0.84), rgba(9, 16, 20, 0.12) 64%, rgba(9, 16, 20, 0.52)),
-    linear-gradient(0deg, rgba(9, 16, 20, 0.56), transparent 58%);
+    linear-gradient(90deg, rgba(9, 16, 20, 0.1), transparent 64%, rgba(9, 16, 20, 0.26)),
+    linear-gradient(0deg, rgba(9, 16, 20, 0.14), transparent 58%);
+}
+
+/* The supplied Motiv8 capture already contains its own navigation and hero copy.
+   Keep the existing stage structure and telemetry, but let the source capture
+   carry the visual story without duplicating its headline over the image. */
+.fitnessBrandLockup,
+.fitnessHeroCopy,
+.fitnessStageFooter {
+  display: none !important;
 }
 
 .fitnessBrandLockup {
