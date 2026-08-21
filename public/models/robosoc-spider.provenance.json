@@ -6,12 +6,12 @@
   "manifest": {
     "path": "webots/cad/spider_geometry.v1.json",
     "schemaVersion": 1,
-    "sha256": "cdc9010fec586831ea363075a2400b7d57c60ed5650f9cbc94c7b2747091f568"
+    "sha256": "d019b03cdc76395dd23ae53fcc3dd01f6980222d742b2b63bf92015f54244966"
   },
   "output": {
     "path": "public/models/robosoc-spider.glb",
-    "sha256": "89510c942cfb10207a8bfc85608a892e9d69445bb826e01eb93df16a1fb100a5",
-    "sizeBytes": 1556376
+    "sha256": "d246ac5a8bb05d8128b224b177f9fe2c7ff6156c79a8f534558dd77013a4c16b",
+    "sizeBytes": 1558400
   },
   "source": {
     "archivePath": "model/Full_Spider.f3z",
@@ -21,7 +21,7 @@
       {
         "lineage": "-LtX4WhtTk6Stc2xmFMdYw",
         "name": "legAssemble",
-        "version": 19
+        "version": 21
       },
       {
         "lineage": "SxpBUVqlRuac5sd-3UU2Dw",
@@ -31,7 +31,7 @@
       {
         "lineage": "XPym-L1JSrSmLzQ0OQ_VQA",
         "name": "SERVO RSD3230",
-        "version": 11
+        "version": 12
       },
       {
         "lineage": "jenrKBCaTGaDQYTZ0OQ6ZA",
@@ -56,7 +56,7 @@
     ],
     "fusionBuild": "2704.1.53",
     "lineage": "zyUEBEY-SrODxrte3NrQMw",
-    "version": 13
+    "version": 15
   },
   "sourceAssets": [
     {

@@ -2,6 +2,8 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import * as THREE from "three";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -124,6 +126,47 @@ describe("committed RoboSoc spider asset", () => {
         (asset) => asset.outputVertexCount > 0 && !path.isAbsolute(asset.path),
       ),
     ).toBe(true);
+  });
+
+  it("reconstructs the upright Fusion reset pose for all six legs", async () => {
+    const model = await readFile(modelPath);
+    const arrayBuffer = Uint8Array.from(model).buffer;
+    const { scene } = await new GLTFLoader().parseAsync(arrayBuffer, "");
+    const resetCommands = {
+      coxa: 0,
+      femur: 28 * Math.PI / 180,
+      tibia: 115 * Math.PI / 180,
+    } as const;
+    const axes = { coxa: "y", femur: "z", tibia: "z" } as const;
+
+    for (const leg of ROBOSOC_LEG_NAMES) {
+      for (const role of ["coxa", "femur", "tibia"] as const) {
+        const joint = scene.getObjectByName(`${leg}_${role}_joint`);
+        expect(joint, `${leg} ${role} joint`).toBeDefined();
+        joint!.rotation[axes[role]] +=
+          resetCommands[role] * Number(joint!.userData.commandSign);
+      }
+    }
+    scene.updateMatrixWorld(true);
+
+    let bodyVisual: THREE.Object3D | undefined;
+    scene.traverse((object) => {
+      if (object.userData.component === "Hex base-smaller") {
+        bodyVisual = object;
+      }
+    });
+    expect(bodyVisual).toBeDefined();
+    const bodyBounds = new THREE.Box3().setFromObject(bodyVisual!);
+
+    for (const leg of ROBOSOC_LEG_NAMES) {
+      const tibiaVisuals = scene.getObjectByName(`${leg}_tibia_visuals`);
+      expect(tibiaVisuals, `${leg} tibia visuals`).toBeDefined();
+      const tibiaBounds = new THREE.Box3().setFromObject(tibiaVisuals!);
+
+      expect(tibiaBounds.min.y).toBeCloseTo(-0.11159125, 6);
+      expect(tibiaBounds.min.y).toBeLessThan(bodyBounds.min.y - 0.08);
+      expect(tibiaBounds.max.y).toBeGreaterThan(bodyBounds.max.y + 0.04);
+    }
   });
 
   it("keeps provenance free of machine-local paths and credential fields", async () => {
