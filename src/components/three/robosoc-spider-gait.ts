@@ -60,10 +60,10 @@ const SOURCE_LENGTHS_MM = {
 
 // The committed GLB is exported from the Fusion manifest in metres.
 const SOURCE_SCENE_SCALE = 0.001;
-const STRIDE_MM = 132;
+const STRIDE_MM = 120;
 const WALK_STEP_COUNT = 48;
-const BODY_HEIGHT_MM = -150;
-const BODY_X_MM = 142;
+const BODY_HEIGHT_MM = -125;
+const BODY_X_MM = 130;
 const LIFT_MM = 20;
 const PATROL_PERIOD_SECONDS = 14;
 const WALK_CYCLES_PER_PATROL = 18;
@@ -79,8 +79,6 @@ export const ROBOSOC_SPIDER_STAND_ANGLES: RobosocSpiderLegAngles = {
   femur: degreesToRadians(28),
   tibia: degreesToRadians(115),
 };
-
-const ROBOSOC_SPIDER_JOINT_RESET_ANGLES: RobosocSpiderLegAngles = ROBOSOC_SPIDER_STAND_ANGLES;
 
 export const ROBOSOC_SPIDER_JOINT_LIMITS: Record<
   RobosocSpiderJointRole,
@@ -218,9 +216,10 @@ export function getRobosocSpiderJointRotation(
   role: RobosocSpiderJointRole,
   commandAngle: number,
 ) {
-  return baseline + (
-    commandAngle - ROBOSOC_SPIDER_JOINT_RESET_ANGLES[role]
-  ) * ROBOSOC_SPIDER_JOINT_SIGNS[role];
+  // Joint nodes are exported at the zero-command transform. Applying the
+  // command with the manifest sign reconstructs both the CAD reset pose and
+  // every subsequent Webots/IK command without double-subtracting the reset.
+  return baseline + commandAngle * ROBOSOC_SPIDER_JOINT_SIGNS[role];
 }
 
 export function sampleSpiderLegIk(target: Vec3Tuple): RobosocSpiderLegAngles {
@@ -231,8 +230,10 @@ export function forwardSpiderLegKinematics(
   angles: RobosocSpiderLegAngles,
   lengths = ROBOSOC_SPIDER_LEG_LENGTHS,
 ): Vec3Tuple[] {
-  const theta1 = angles.coxa - Math.PI / 2;
-  const theta2 = angles.femur - Math.PI / 2;
+  // The source FK subtracts 90-degree hardware-servo offsets. These values
+  // are already command-space IK angles, so the offsets are not present here.
+  const theta1 = angles.coxa;
+  const theta2 = angles.femur;
   const theta3 = angles.tibia;
   const coxaX = lengths.coxa * Math.cos(theta1);
   const coxaY = lengths.coxa * Math.sin(theta1);
@@ -270,7 +271,7 @@ export function getSpiderLegMount(legName: RobosocLegName): Vec3Tuple {
   return [
     Math.cos(angle) * LEG_MOUNT_RADIUS,
     LEG_MOUNT_Z,
-    Math.sin(angle) * LEG_MOUNT_RADIUS,
+    -Math.sin(angle) * LEG_MOUNT_RADIUS,
   ];
 }
 
@@ -304,7 +305,7 @@ export function sampleRobosocSpiderGait(
     const footTravel = (swing ? 1 : -1) * travel;
     // Solve in the leg's own Fusion frame. The GLB leg root already carries
     // each radial heading, so the IK target must stay local to that root.
-    const foot: Vec3Tuple = [BODY_X + footTravel, 0, height];
+    const foot: Vec3Tuple = [BODY_X, footTravel, height];
 
     legs[legName] = {
       angles: solveSpiderLegIk(foot),

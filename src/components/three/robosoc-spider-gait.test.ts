@@ -11,6 +11,7 @@ import {
   createStableRobosocSpiderPose,
   forwardSpiderLegKinematics,
   getRobosocSpiderJointRotation,
+  getSpiderLegMount,
   sampleRobosocSpiderGait,
   sampleSpiderLegIk,
   tripodPhaseDistance,
@@ -36,14 +37,22 @@ describe("RoboSoc spider gait", () => {
     });
   });
 
-  it("applies commands relative to the Fusion reset rotations", () => {
+  it("reconstructs the Fusion CAD pose at the documented reset commands", () => {
     expect(getRobosocSpiderJointRotation(0, "coxa", 0)).toBeCloseTo(0);
     expect(
       getRobosocSpiderJointRotation(-28 * Math.PI / 180, "femur", 28 * Math.PI / 180),
-    ).toBeCloseTo(-28 * Math.PI / 180);
+    ).toBeCloseTo(0);
     expect(
       getRobosocSpiderJointRotation(115 * Math.PI / 180, "tibia", 115 * Math.PI / 180),
-    ).toBeCloseTo(115 * Math.PI / 180);
+    ).toBeCloseTo(0);
+  });
+
+  it("maps positive Fusion headings onto the negative body Z side", () => {
+    expect(getSpiderLegMount("legi")[2]).toBeCloseTo(0);
+    expect(getSpiderLegMount("legj")[2]).toBeLessThan(0);
+    expect(getSpiderLegMount("legk")[2]).toBeLessThan(0);
+    expect(getSpiderLegMount("legm")[2]).toBeGreaterThan(0);
+    expect(getSpiderLegMount("legn")[2]).toBeGreaterThan(0);
   });
 
   it("keeps the real tripod groups half a cycle apart", () => {
@@ -84,6 +93,50 @@ describe("RoboSoc spider gait", () => {
 
       expect(sample.bodyX).toBe(0);
       expect(sample.bodyZ).toBe(0);
+    }
+  });
+
+  it("tracks every sampled Bezier foot target through IK and FK", () => {
+    for (const time of [0, 0.11, 0.23, 0.39, 1.2, 4.7, 8.1, 13.4]) {
+      const sample = sampleRobosocSpiderGait(time);
+
+      for (const leg of ROBOSOC_LEG_NAMES) {
+        const chain = forwardSpiderLegKinematics(sample.legs[leg].angles);
+        const endpoint = chain.at(-1)!;
+        const target = sample.legs[leg].foot;
+        const residual = Math.hypot(
+          endpoint[0] - target[0],
+          endpoint[1] - target[1],
+          endpoint[2] - target[2],
+        );
+
+        expect(residual).toBeLessThan(1e-8);
+      }
+    }
+  });
+
+  it("sweeps tangentially while keeping radial reach fixed", () => {
+    const swingStart = sampleRobosocSpiderGait(0).legs.legi.foot;
+    const swingEnd = sampleRobosocSpiderGait(14 / 36).legs.legi.foot;
+
+    expect(swingStart[0]).toBeCloseTo(swingEnd[0], 10);
+    expect(swingStart[0]).toBeCloseTo(0.13, 10);
+    expect(swingStart[1]).toBeCloseTo(-0.06, 10);
+    expect(swingEnd[1]).toBeCloseTo(0.06, 10);
+    expect(swingStart[2]).toBeCloseTo(swingEnd[2], 10);
+    expect(swingStart[2]).toBeCloseTo(-0.125, 10);
+  });
+
+  it("lifts only the active tripod above the planted support tripod", () => {
+    const midSwing = sampleRobosocSpiderGait(14 / 72);
+
+    for (const leg of ROBOSOC_TRIPOD_A) {
+      expect(midSwing.legs[leg].planted).toBe(false);
+      expect(midSwing.legs[leg].foot[2]).toBeCloseTo(-0.105, 8);
+    }
+    for (const leg of ROBOSOC_TRIPOD_B) {
+      expect(midSwing.legs[leg].planted).toBe(true);
+      expect(midSwing.legs[leg].foot[2]).toBeCloseTo(-0.125, 8);
     }
   });
 
@@ -179,20 +232,21 @@ describe("RoboSoc spider gait", () => {
 
   it("keeps the tripod stance elevated and articulated in 3D", () => {
     const planted = sampleRobosocSpiderGait(14 / 36);
-    const swing = sampleRobosocSpiderGait(0);
+    const swing = sampleRobosocSpiderGait(14 / 72);
     const plantedLegiChain = forwardSpiderLegKinematics(planted.legs.legi.angles);
     const swingLegiChain = forwardSpiderLegKinematics(swing.legs.legi.angles);
 
     for (const leg of ROBOSOC_LEG_NAMES) {
       const chain = forwardSpiderLegKinematics(planted.legs[leg].angles);
-      expect(planted.legs[leg].foot[2]).toBeLessThan(-0.13);
-      expect(chain[2][2]).toBeLessThan(0);
+      expect(planted.legs[leg].foot[2]).toBeCloseTo(-0.125, 8);
+      expect(chain[3][2]).toBeCloseTo(planted.legs[leg].foot[2], 8);
+      expect(chain[2][2]).toBeGreaterThan(chain[3][2]);
       expect(Math.abs(chain[3][2] - chain[2][2])).toBeGreaterThan(0.04);
     }
 
     expect(swingLegiChain[3][2]).toBeGreaterThan(plantedLegiChain[3][2]);
-    expect(swingLegiChain[3][2] - plantedLegiChain[3][2]).toBeGreaterThan(0.08);
-    expect(planted.legs.legj.foot[2]).toBeCloseTo(-0.15, 2);
+    expect(swingLegiChain[3][2] - plantedLegiChain[3][2]).toBeCloseTo(0.02, 8);
+    expect(planted.legs.legj.foot[2]).toBeCloseTo(-0.125, 8);
   });
 
   it("uses a stable planted reduced-motion pose", () => {
