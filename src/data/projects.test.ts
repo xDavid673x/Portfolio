@@ -23,7 +23,7 @@ describe("project portfolio data", () => {
     expect(projectById["fitness-platform"].evidenceType).toBe("verified");
     expect(projectById["robotic-arm"].status).toBe("In development");
     expect(projectById["robotic-arm"].evidenceType).toBe("planned");
-    expect(projectById["robosoc-spider"].status).toBe("In development");
+    expect(projectById["robosoc-spider"].status).toBe("Completed");
     expect(projectById["robosoc-spider"].evidenceType).toBe("verified");
   });
 

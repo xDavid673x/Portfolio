@@ -47,7 +47,7 @@ export const projects: Project[] = [
     id: "robosoc-spider",
     title: "Programming a hexapod to move as one",
     shortTitle: "RoboSoc spider",
-    status: "In development",
+    status: "Completed",
     context: "Program Lead / RoboSoc group project",
     summary:
       "As Program Lead, I am coordinating the software that turns an 18-joint Fusion-designed hexapod into a stable, testable walking platform.",
