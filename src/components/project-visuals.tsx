@@ -17,6 +17,9 @@ const simulationKeyTimes = "0;0.12;0.25;0.42;0.54;0.68;0.82;0.94;1";
 const simulationKeySplines =
   "0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1";
 
+const MOTIV8_HOMEPAGE_URL =
+  "https://year1-group-project.vercel.app/homepage/homepage.html";
+
 function joinClassNames(...classNames: Array<string | undefined>) {
   return classNames.filter(Boolean).join(" ");
 }
@@ -408,6 +411,15 @@ export function FitnessPlatformVisual({ className }: { className?: string }) {
         <div className={styles.fitnessStage}>
           <div className={styles.fitnessPhoto} />
           <div className={styles.fitnessPhotoWash} />
+          <iframe
+            className={styles.fitnessEmbed}
+            src={MOTIV8_HOMEPAGE_URL}
+            title="Motiv8 hosted homepage preview"
+            loading="lazy"
+            referrerPolicy="no-referrer"
+            scrolling="no"
+            tabIndex={-1}
+          />
           <div className={styles.fitnessBrandLockup}>
             <span className={styles.fitnessLogo} />
             <span>TEAM PROJECT / 2025</span>
