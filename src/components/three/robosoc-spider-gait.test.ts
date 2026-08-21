@@ -18,8 +18,6 @@ import {
 } from "./robosoc-spider-gait";
 
 describe("RoboSoc spider gait", () => {
-  const showcaseYaw = 35 * Math.PI / 180;
-
   it("uses the Fusion-derived link lengths", () => {
     expect(ROBOSOC_SPIDER_LEG_LENGTHS.coxa).toBeCloseTo(0.042069923, 8);
     expect(ROBOSOC_SPIDER_LEG_LENGTHS.femur).toBeCloseTo(0.088059172, 8);
@@ -216,18 +214,15 @@ describe("RoboSoc spider gait", () => {
     }
   });
 
-  it("sweeps the body yaw smoothly across the showcase cycle", () => {
-    const quarter = sampleRobosocSpiderGait(3.5);
-    const half = sampleRobosocSpiderGait(7);
-    const threeQuarter = sampleRobosocSpiderGait(10.5);
+  it("keeps a fixed forward heading throughout the gait", () => {
+    for (const time of [0, 1.75, 3.5, 7, 10.5, 13.99, 14]) {
+      const sample = sampleRobosocSpiderGait(time);
 
-    expect(quarter.bodyYaw).toBeCloseTo(showcaseYaw, 6);
-    expect(half.bodyYaw).toBeCloseTo(0, 6);
-    expect(threeQuarter.bodyYaw).toBeCloseTo(-showcaseYaw, 6);
-    expect(quarter.bodyX).toBe(0);
-    expect(quarter.bodyZ).toBe(0);
-    expect(quarter.turnBlend).toBeCloseTo(1, 6);
-    expect(threeQuarter.turnBlend).toBeCloseTo(0, 6);
+      expect(sample.bodyYaw).toBe(0);
+      expect(sample.bodyX).toBe(0);
+      expect(sample.bodyZ).toBe(0);
+      expect(sample.turnBlend).toBe(0);
+    }
   });
 
   it("keeps the tripod stance elevated and articulated in 3D", () => {

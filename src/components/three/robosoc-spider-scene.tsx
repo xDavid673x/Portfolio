@@ -15,6 +15,12 @@ import * as THREE from "three";
 
 import styles from "./HeroScene.module.css";
 import { RobosocSpiderModel } from "./robosoc-spider-model";
+import {
+  ROBOSOC_SPIDER_FLOOR_Y,
+  ROBOSOC_SPIDER_MODEL_ROOT_Y,
+  ROBOSOC_SPIDER_MODEL_SCALE,
+  ROBOSOC_SPIDER_WRAPPER_SCALE,
+} from "./robosoc-spider-presentation";
 
 export type RobosocSpiderSceneProps = {
   className?: string;
@@ -80,7 +86,10 @@ function canRenderWebGL() {
 function SpiderCourse() {
   return (
     <group>
-      <mesh position={[0, -1.18, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh
+        position={[0, ROBOSOC_SPIDER_FLOOR_Y - 0.02, 0]}
+        rotation={[-Math.PI / 2, 0, 0]}
+      >
         <planeGeometry args={[6.8, 4.2]} />
         <meshStandardMaterial
           color="#0a0f10"
@@ -90,7 +99,10 @@ function SpiderCourse() {
           opacity={0.72}
         />
       </mesh>
-      <gridHelper args={[6.8, 14, "#314143", "#1a2527"]} position={[0, -1.16, 0]} />
+      <gridHelper
+        args={[6.8, 14, "#314143", "#1a2527"]}
+        position={[0, ROBOSOC_SPIDER_FLOOR_Y, 0]}
+      />
       {[-2.25, 2.25].map((x) => (
         <mesh key={x} position={[x, -1.08, -1.72]}>
           <boxGeometry args={[0.18, 0.1, 0.42]} />
@@ -185,10 +197,10 @@ function RobosocSpiderWorld({
         <Suspense fallback={null}>
           <RobosocSpiderModel
             active={active}
-            modelScale={4.25}
-            position={[0, -0.98, 0]}
+            modelScale={ROBOSOC_SPIDER_MODEL_SCALE}
+            position={[0, ROBOSOC_SPIDER_MODEL_ROOT_Y, 0]}
             rotation={[0, -0.24, 0]}
-            scale={0.86}
+            scale={ROBOSOC_SPIDER_WRAPPER_SCALE}
           />
         </Suspense>
       </group>
@@ -299,7 +311,7 @@ export function RobosocSpiderSceneFallback({
 
 export function RobosocSpiderScene({
   className,
-  label = "An interactive 3D RoboSoc hexapod spider robot walking in alternating tripod gait",
+  label = "An interactive 3D RoboSoc hexapod walking forward in alternating tripod gait",
   style,
 }: RobosocSpiderSceneProps) {
   const [webGLReady, setWebGLReady] = useState(false);

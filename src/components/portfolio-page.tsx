@@ -432,11 +432,11 @@ export function PortfolioPage() {
                     <div className="robosoc-spider-scene-frame">
                       <RobosocSpiderScene
                         className="robosoc-spider-project-scene"
-                        label="The articulated RoboSoc hexapod performing a continuous alternating-tripod patrol"
+                        label="The articulated RoboSoc hexapod walking forward with a continuous alternating-tripod gait"
                       />
                       <div className="robosoc-spider-scene-note" aria-hidden="true">
                         <span>Tripod A / Tripod B</span>
-                        <span>Continuous patrol cycle</span>
+                        <span>Continuous forward gait</span>
                       </div>
                     </div>
                   ) : (

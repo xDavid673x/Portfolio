@@ -114,7 +114,6 @@ const STRIDE = STRIDE_MM * SOURCE_TARGET_SCALE;
 const BODY_HEIGHT = BODY_HEIGHT_MM * SOURCE_TARGET_SCALE;
 const BODY_X = BODY_X_MM * SOURCE_TARGET_SCALE;
 const LIFT = LIFT_MM * SOURCE_TARGET_SCALE;
-const SHOWCASE_YAW = degreesToRadians(35);
 
 function degreesToRadians(value: number) {
   return value * Math.PI / 180;
@@ -282,9 +281,6 @@ export function sampleRobosocSpiderGait(
     elapsedSeconds / PATROL_PERIOD_SECONDS,
     1,
   );
-  const cyclePhase = patrolProgress * Math.PI * 2;
-  const bodyYaw = Math.sin(cyclePhase) * SHOWCASE_YAW;
-  const turnBlend = 0.5 + 0.5 * Math.sin(cyclePhase);
   const cycleProgress = positiveModulo(
     patrolProgress * WALK_CYCLES_PER_PATROL,
     1,
@@ -317,13 +313,13 @@ export function sampleRobosocSpiderGait(
   }
 
   return {
-    bodyYaw,
+    bodyYaw: 0,
     bodyX: 0,
     bodyZ: 0,
     cycleProgress,
     legs,
     patrolProgress,
-    turnBlend,
+    turnBlend: 0,
   };
 }
 

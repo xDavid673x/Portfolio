@@ -9,7 +9,16 @@ import { describe, expect, it } from "vitest";
 import {
   ROBOSOC_LEG_NAMES,
   ROBOSOC_SPIDER_GAIT_COMPENSATION,
+  getRobosocSpiderJointRotation,
+  sampleRobosocSpiderGait,
 } from "./robosoc-spider-gait";
+import {
+  ROBOSOC_SPIDER_FLOOR_CLEARANCE,
+  ROBOSOC_SPIDER_FLOOR_Y,
+  ROBOSOC_SPIDER_MODEL_ROOT_Y,
+  ROBOSOC_SPIDER_MODEL_SCALE,
+  ROBOSOC_SPIDER_WRAPPER_SCALE,
+} from "./robosoc-spider-presentation";
 
 type GlbNode = {
   children?: number[];
@@ -167,6 +176,58 @@ describe("committed RoboSoc spider asset", () => {
       expect(tibiaBounds.min.y).toBeLessThan(bodyBounds.min.y - 0.08);
       expect(tibiaBounds.max.y).toBeGreaterThan(bodyBounds.max.y + 0.04);
     }
+  });
+
+  it("keeps every animated leg above the visible floor", async () => {
+    const model = await readFile(modelPath);
+    const arrayBuffer = Uint8Array.from(model).buffer;
+    const { scene } = await new GLTFLoader().parseAsync(arrayBuffer, "");
+    const axes = { coxa: "y", femur: "z", tibia: "z" } as const;
+    const joints = ROBOSOC_LEG_NAMES.reduce((map, leg) => {
+      map[leg] = {} as Record<"coxa" | "femur" | "tibia", THREE.Object3D>;
+      for (const role of ["coxa", "femur", "tibia"] as const) {
+        const joint = scene.getObjectByName(`${leg}_${role}_joint`);
+        expect(joint, `${leg} ${role} joint`).toBeDefined();
+        map[leg][role] = joint!;
+      }
+      return map;
+    }, {} as Record<(typeof ROBOSOC_LEG_NAMES)[number], Record<"coxa" | "femur" | "tibia", THREE.Object3D>>);
+    const baselines = ROBOSOC_LEG_NAMES.reduce((map, leg) => {
+      map[leg] = {
+        coxa: joints[leg].coxa.rotation.y,
+        femur: joints[leg].femur.rotation.z,
+        tibia: joints[leg].tibia.rotation.z,
+      };
+      return map;
+    }, {} as Record<(typeof ROBOSOC_LEG_NAMES)[number], Record<"coxa" | "femur" | "tibia", number>>);
+    const bounds = new THREE.Box3();
+    let lowestModelY = Number.POSITIVE_INFINITY;
+
+    for (let frame = 0; frame <= 280; frame += 1) {
+      const sample = sampleRobosocSpiderGait(frame / 20);
+
+      for (const leg of ROBOSOC_LEG_NAMES) {
+        for (const role of ["coxa", "femur", "tibia"] as const) {
+          joints[leg][role].rotation[axes[role]] = getRobosocSpiderJointRotation(
+            baselines[leg][role],
+            role,
+            sample.legs[leg].angles[role],
+          );
+        }
+      }
+
+      scene.updateMatrixWorld(true);
+      bounds.setFromObject(scene);
+      lowestModelY = Math.min(lowestModelY, bounds.min.y);
+    }
+
+    const lowestDisplayedY =
+      ROBOSOC_SPIDER_MODEL_ROOT_Y +
+      lowestModelY * ROBOSOC_SPIDER_MODEL_SCALE * ROBOSOC_SPIDER_WRAPPER_SCALE;
+
+    expect(lowestDisplayedY).toBeGreaterThanOrEqual(
+      ROBOSOC_SPIDER_FLOOR_Y + ROBOSOC_SPIDER_FLOOR_CLEARANCE,
+    );
   });
 
   it("keeps provenance free of machine-local paths and credential fields", async () => {
