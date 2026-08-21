@@ -1,4 +1,6 @@
-export const ROBOSOC_SPIDER_MODEL_URL = "/models/robosoc-spider.glb";
+import { assetPath } from "@/lib/asset-path";
+
+export const ROBOSOC_SPIDER_MODEL_URL = assetPath("/models/robosoc-spider.glb");
 
 export const ROBOSOC_LEG_NAMES = [
   "legi",

@@ -16,6 +16,7 @@ import {
 } from "react";
 import * as THREE from "three";
 
+import { assetPath } from "@/lib/asset-path";
 import { FloatingHeadModel } from "./floating-head-model";
 import styles from "./PortraitScene.module.css";
 
@@ -28,8 +29,9 @@ export type HeroSceneProps = {
 type BoundaryProps = { children: ReactNode; fallback: ReactNode };
 type BoundaryState = { failed: boolean };
 
-const FALLBACK_PORTRAIT =
-  "/images/avatar/david-floating-head-fallback-v5.png";
+const FALLBACK_PORTRAIT = assetPath(
+  "/images/avatar/david-floating-head-fallback-v5.png",
+);
 
 class WebGLBoundary extends Component<BoundaryProps, BoundaryState> {
   state: BoundaryState = { failed: false };

@@ -5,8 +5,11 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, type MutableRefObject } from "react";
 import * as THREE from "three";
 
-export const FLOATING_HEAD_MODEL_URL =
-  "/models/avatar/david-floating-head-v1.glb";
+import { assetPath } from "@/lib/asset-path";
+
+export const FLOATING_HEAD_MODEL_URL = assetPath(
+  "/models/avatar/david-floating-head-v1.glb",
+);
 
 export type FloatingHeadModelProps = {
   active: boolean;

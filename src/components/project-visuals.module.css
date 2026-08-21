@@ -1236,7 +1236,7 @@
 .fitnessPhoto {
   background:
     linear-gradient(rgba(12, 20, 24, 0.12), rgba(12, 20, 24, 0.12)),
-    url("/images/gym-platform.webp") center / cover no-repeat,
+    var(--fitness-photo-url) center / cover no-repeat,
     #293840;
   filter: saturate(0.58) contrast(1.1) brightness(0.82);
   transform: scale(1.02);
@@ -1267,7 +1267,7 @@
   aspect-ratio: 1024 / 273;
   border-left: 0.18rem solid var(--accent);
   background:
-    url("/images/motiv8-logo.png") center / 88% auto no-repeat,
+    var(--motiv8-logo-url) center / 88% auto no-repeat,
     rgba(244, 241, 232, 0.94);
   box-shadow: 0 0.75rem 2rem rgba(5, 9, 11, 0.28);
 }

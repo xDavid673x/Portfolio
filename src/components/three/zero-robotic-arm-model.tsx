@@ -12,6 +12,8 @@ import {
 } from "react";
 import * as THREE from "three";
 
+import { assetPath } from "@/lib/asset-path";
+
 import {
   interpolateCatmullRom,
   sampleRobotCycle,
@@ -21,8 +23,9 @@ import {
   type RobotCycleTargets,
 } from "./robotic-arm-kinematics";
 
-export const ZERO_ROBOTIC_ARM_MODEL_URL =
-  "/models/zero-robotic-arm/zero-robotic-arm.glb";
+export const ZERO_ROBOTIC_ARM_MODEL_URL = assetPath(
+  "/models/zero-robotic-arm/zero-robotic-arm.glb",
+);
 
 const JOINT_NAMES = [
   "joint1_axis",

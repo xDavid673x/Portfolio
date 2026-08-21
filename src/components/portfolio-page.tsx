@@ -10,6 +10,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import { ProjectVisual as ProjectVisualPanel } from "@/components/project-visuals";
 import { projects } from "@/data/projects";
+import { assetPath } from "@/lib/asset-path";
 
 const RoboticArmScene = dynamic(
   () =>
@@ -220,8 +221,17 @@ export function PortfolioPage() {
   const showNextEvidence = () =>
     setEvidenceIndex((current) => (current + 1) % evidenceItems.length);
 
+  const publicAssetStyles = {
+    "--fitness-photo-url": `url("${assetPath("/images/gym-platform.webp")}")`,
+    "--motiv8-logo-url": `url("${assetPath("/images/motiv8-logo.png")}")`,
+  } as CSSProperties;
+
   return (
-    <main ref={root} className="portfolio-shell overflow-x-hidden w-full max-w-full">
+    <main
+      ref={root}
+      className="portfolio-shell overflow-x-hidden w-full max-w-full"
+      style={publicAssetStyles}
+    >
       <section className="hero" id="top">
         <div className="hero-noise" aria-hidden="true" />
         <div className="hero-panel">
@@ -275,7 +285,7 @@ export function PortfolioPage() {
                 height={1402}
                 priority
                 sizes="(max-width: 620px) 96vw, (max-width: 899px) 74vw, 52vw"
-                src="/images/avatar/david-hero-portrait-v1.png"
+                src={assetPath("/images/avatar/david-hero-portrait-v1.png")}
                 width={1122}
               />
             </div>
