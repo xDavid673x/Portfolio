@@ -138,25 +138,56 @@ export function PortfolioPage() {
 
           const intro = gsap.timeline({ defaults: { ease: "power3.out" } });
           intro
-            .from(".site-nav", { y: -24, opacity: 0, duration: 0.7 })
-            .from(
+            .fromTo(
+              ".site-nav",
+              { y: -24, opacity: 0 },
+              { y: 0, opacity: 1, duration: 0.7 },
+            )
+            .fromTo(
               ".hero-context, .hero-title__line, .hero-intro, .hero-actions",
               {
                 y: 44,
                 opacity: 0,
+              },
+              {
+                y: 0,
+                opacity: 1,
                 duration: 0.9,
                 stagger: 0.09,
               },
               "-=0.35",
             )
-            .from(".hero-visual", { scale: 0.9, opacity: 0, duration: 1.1 }, "-=0.9");
+            .fromTo(
+              ".hero-visual",
+              { scale: 0.9, opacity: 0 },
+              { scale: 1, opacity: 1, duration: 1.1 },
+              "-=0.9",
+            );
 
-          gsap.to(".marquee-track", {
+          const introFailsafe = gsap.delayedCall(1.8, () => {
+            if (intro.progress() < 1) intro.progress(1);
+            gsap.set(
+              ".site-nav, .hero-context, .hero-title__line, .hero-intro, .hero-actions, .hero-visual",
+              { clearProps: "opacity,transform" },
+            );
+          });
+
+          const marqueeTween = gsap.to(".marquee-track", {
             xPercent: -100 / MARQUEE_GROUP_COUNT,
             duration: 28,
             repeat: -1,
             ease: "none",
           });
+
+          const handleVisibility = () => {
+            const animations = [intro, marqueeTween, introFailsafe];
+            animations.forEach((animation) => {
+              if (document.hidden) animation.pause();
+              else animation.resume();
+            });
+          };
+          document.addEventListener("visibilitychange", handleVisibility);
+          handleVisibility();
 
           const revealElements = (elements: Element[]) => {
             delayedTweens.push(
@@ -203,6 +234,13 @@ export function PortfolioPage() {
               pinSpacing: false,
             });
           }
+
+          return () => {
+            document.removeEventListener("visibilitychange", handleVisibility);
+            intro.kill();
+            marqueeTween.kill();
+            introFailsafe.kill();
+          };
         },
       );
 
