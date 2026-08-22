@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 
 import styles from "./project-visuals.module.css";
 
@@ -9,6 +10,7 @@ export type ProjectVisualType = "robot" | "spider" | "fitness";
 type ProjectVisualProps = {
   type: ProjectVisualType;
   className?: string;
+  presentation?: "case-study" | "project-card";
 };
 
 const gaitBands = [
@@ -529,13 +531,125 @@ export function FitnessPlatformVisual({ className }: { className?: string }) {
   );
 }
 
-export function ProjectVisual({ type, className }: ProjectVisualProps) {
+export function FitnessTrainingVisual({ className }: { className?: string }) {
+  const workSets = [82, 100, 68, 54, 38];
+
+  return (
+    <figure
+      className={joinClassNames(styles.visual, styles.fitnessTrainingVisual, className)}
+      role="img"
+      aria-label="Motiv8 strength-session visual showing a loaded barbell, live repetition count, and workout-set telemetry."
+      data-fitness-visual="training"
+    >
+      <div className={styles.technicalHeader} aria-hidden="true">
+        <span>MOTIV8 / STRENGTH SESSION</span>
+        <span className={styles.headerState}>
+          <i /> SET 04 / LIVE
+        </span>
+      </div>
+
+      <div className={styles.trainingLayout} aria-hidden="true">
+        <div className={styles.trainingStage}>
+          <div className={styles.trainingTitleRow}>
+            <span>BENCH PRESS</span>
+            <b>68 KG</b>
+          </div>
+
+          <svg
+            className={styles.trainingBarbell}
+            viewBox="0 0 560 270"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <path className={styles.trainingGuide} d="M40 224H520M72 48V224M488 48V224" />
+            <path className={styles.trainingRange} d="M106 200C180 156 380 156 454 200" />
+            <g className={styles.trainingBench}>
+              <rect x="190" y="190" width="180" height="18" rx="9" />
+              <path d="M216 208L196 244M344 208L364 244" />
+            </g>
+            <g className={styles.trainingBar}>
+              <rect x="82" y="126" width="396" height="12" rx="6" />
+              <rect x="54" y="122" width="452" height="20" rx="5" />
+              <g className={styles.trainingPlatesLeft}>
+                <rect x="86" y="78" width="34" height="108" rx="8" />
+                <rect x="124" y="91" width="25" height="82" rx="6" />
+                <rect x="153" y="104" width="16" height="56" rx="5" />
+              </g>
+              <g className={styles.trainingPlatesRight}>
+                <rect x="440" y="78" width="34" height="108" rx="8" />
+                <rect x="411" y="91" width="25" height="82" rx="6" />
+                <rect x="391" y="104" width="16" height="56" rx="5" />
+              </g>
+            </g>
+            <g className={styles.trainingGrip}>
+              <path d="M236 116V148M324 116V148" />
+              <circle cx="236" cy="132" r="4" />
+              <circle cx="324" cy="132" r="4" />
+            </g>
+          </svg>
+
+          <div className={styles.trainingAxisLabels}>
+            <span>LOAD / CONTROLLED</span>
+            <span>TEMPO 3—1—1</span>
+          </div>
+        </div>
+
+        <aside className={styles.trainingPanel}>
+          <div className={styles.trainingPanelTitle}>
+            <span>REP TARGET</span>
+            <b>80%</b>
+          </div>
+
+          <div className={styles.trainingRepDial}>
+            <div>
+              <strong>08</strong>
+              <span>/ 10 REPS</span>
+            </div>
+          </div>
+
+          <div className={styles.trainingSetTrace}>
+            <span>SET COMPLETION</span>
+            <div>
+              {workSets.map((height, index) => (
+                <i
+                  className={index < 4 ? styles.trainingSetComplete : undefined}
+                  key={height}
+                  style={{ "--set-height": `${height}%` } as CSSProperties}
+                />
+              ))}
+            </div>
+          </div>
+
+          <dl className={styles.trainingMetrics}>
+            <div>
+              <dt>VOLUME</dt>
+              <dd>2,176 KG</dd>
+            </div>
+            <div>
+              <dt>REST</dt>
+              <dd>01:24</dd>
+            </div>
+          </dl>
+        </aside>
+      </div>
+    </figure>
+  );
+}
+
+export function ProjectVisual({
+  type,
+  className,
+  presentation = "case-study",
+}: ProjectVisualProps) {
   if (type === "robot") {
     return <RoboticArmVisual className={className} />;
   }
 
   if (type === "spider") {
     return <SpiderHexapodVisual className={className} />;
+  }
+
+  if (presentation === "project-card") {
+    return <FitnessTrainingVisual className={className} />;
   }
 
   return <FitnessPlatformVisual className={className} />;

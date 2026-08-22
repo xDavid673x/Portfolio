@@ -401,7 +401,10 @@ export function PortfolioPage() {
                   index === 0 ? "" : " group-hover:scale-105 transition-transform duration-700 ease-out"
                 }`}
               >
-                <ProjectVisualPanel type={project.visual} />
+                <ProjectVisualPanel
+                  presentation="project-card"
+                  type={project.visual}
+                />
               </div>
               <div className={`bento-card__copy${index === 0 ? " bento-card__copy--lead" : ""}`}>
                 <span className="bento-card__discipline">
