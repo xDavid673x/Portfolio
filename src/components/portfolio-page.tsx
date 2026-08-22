@@ -467,6 +467,7 @@ export function PortfolioPage() {
                       <DeferredScene
                         anchorId={`case-${project.id}`}
                         className="robotic-arm-project-scene"
+                        eager
                         fallback={<ProjectVisualPanel type="robot" />}
                         onMount={() => ScrollTrigger.refresh()}
                       >
@@ -485,6 +486,7 @@ export function PortfolioPage() {
                       <DeferredScene
                         anchorId={`case-${project.id}`}
                         className="robosoc-spider-project-scene"
+                        eager
                         fallback={<ProjectVisualPanel type="spider" />}
                         onMount={() => ScrollTrigger.refresh()}
                       >

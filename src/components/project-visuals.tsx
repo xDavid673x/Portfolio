@@ -402,7 +402,9 @@ export function FitnessPlatformVisual({ className }: { className?: string }) {
   const embedRef = useRef<HTMLIFrameElement>(null);
   const activationTimer = useRef<number | undefined>(undefined);
   const timeoutTimer = useRef<number | undefined>(undefined);
-  const [embedRequested, setEmbedRequested] = useState(false);
+  // The hosted page is an enhancement, but request it immediately so the
+  // complete project preview is ready while the visitor reads the first card.
+  const [embedRequested, setEmbedRequested] = useState(true);
   const [embedLoaded, setEmbedLoaded] = useState(false);
   const [embedFailed, setEmbedFailed] = useState(false);
 

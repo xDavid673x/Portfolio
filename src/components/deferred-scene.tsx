@@ -13,6 +13,8 @@ export type DeferredSceneProps = {
   children: ReactNode;
   className?: string;
   fallback: ReactNode;
+  /** Mount immediately when the page is ready instead of waiting for scroll. */
+  eager?: boolean;
   onMount?: () => void;
   rootMargin?: string;
   style?: CSSProperties;
@@ -32,6 +34,7 @@ export function DeferredScene({
   anchorId,
   children,
   className,
+  eager = false,
   fallback,
   onMount,
   rootMargin = "600px 0px",
@@ -40,7 +43,7 @@ export function DeferredScene({
   const root = useRef<HTMLDivElement>(null);
   const onMountRef = useRef(onMount);
   const notifiedRef = useRef(false);
-  const [isMounted, setIsMounted] = useState(false);
+  const [isMounted, setIsMounted] = useState(eager);
 
   useEffect(() => {
     onMountRef.current = onMount;
@@ -63,9 +66,10 @@ export function DeferredScene({
     };
 
     checkHash();
+    if (eager) mount();
     window.addEventListener("hashchange", checkHash);
 
-    if ("IntersectionObserver" in window) {
+    if (!eager && "IntersectionObserver" in window) {
       observer = new IntersectionObserver(
         ([entry]) => {
           if (entry?.isIntersecting || (entry?.intersectionRatio ?? 0) > 0) {
@@ -76,7 +80,7 @@ export function DeferredScene({
         { rootMargin },
       );
       observer.observe(element);
-    } else {
+    } else if (!eager) {
       mount();
     }
 
@@ -85,7 +89,7 @@ export function DeferredScene({
       observer?.disconnect();
       window.removeEventListener("hashchange", checkHash);
     };
-  }, [anchorId, rootMargin]);
+  }, [anchorId, eager, rootMargin]);
 
   useEffect(() => {
     if (!isMounted || notifiedRef.current) return;
@@ -109,4 +113,3 @@ export function DeferredScene({
     </div>
   );
 }
-
