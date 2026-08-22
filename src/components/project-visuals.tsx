@@ -18,7 +18,7 @@ const simulationKeySplines =
   "0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1";
 
 const MOTIV8_HOMEPAGE_URL =
-  "https://year1-group-project-qsr0gk42h-ka-chong-s-projects.vercel.app/homepage/homepage.html";
+  "https://year1-group-project.vercel.app/homepage/homepage.html";
 
 function joinClassNames(...classNames: Array<string | undefined>) {
   return classNames.filter(Boolean).join(" ");
