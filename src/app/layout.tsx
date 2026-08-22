@@ -62,20 +62,6 @@ export default function RootLayout({
           media="(max-width: 680px)"
           type="image/webp"
         />
-        <link
-          rel="preload"
-          as="fetch"
-          href={assetPath("/models/zero-robotic-arm/zero-robotic-arm.glb")}
-          crossOrigin="anonymous"
-          type="model/gltf-binary"
-        />
-        <link
-          rel="preload"
-          as="fetch"
-          href={assetPath("/models/robosoc-spider.glb")}
-          crossOrigin="anonymous"
-          type="model/gltf-binary"
-        />
       </head>
       <body suppressHydrationWarning>
         {children}

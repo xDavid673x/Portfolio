@@ -10,6 +10,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ProjectVisual as ProjectVisualPanel } from "@/components/project-visuals";
 import { DeferredScene } from "@/components/deferred-scene";
 import { HeroPortrait } from "@/components/hero-portrait";
+import { useSceneAssetWarmup } from "@/components/scene-asset-warmup";
 import { projects } from "@/data/projects";
 import { assetPath } from "@/lib/asset-path";
 
@@ -118,6 +119,8 @@ export function PortfolioPage() {
   const root = useRef<HTMLElement>(null);
   const [evidenceIndex, setEvidenceIndex] = useState(0);
 
+  useSceneAssetWarmup();
+
   useGSAP(
     () => {
       const media = gsap.matchMedia();
@@ -138,37 +141,23 @@ export function PortfolioPage() {
 
           const intro = gsap.timeline({ defaults: { ease: "power3.out" } });
           intro
-            .fromTo(
-              ".site-nav",
-              { y: -24, opacity: 0 },
-              { y: 0, opacity: 1, duration: 0.7 },
-            )
-            .fromTo(
+            .from(".site-nav", { y: -24, duration: 0.7 })
+            .from(
               ".hero-context, .hero-title__line, .hero-intro, .hero-actions",
               {
                 y: 44,
-                opacity: 0,
-              },
-              {
-                y: 0,
-                opacity: 1,
                 duration: 0.9,
                 stagger: 0.09,
               },
               "-=0.35",
             )
-            .fromTo(
-              ".hero-visual",
-              { scale: 0.9, opacity: 0 },
-              { scale: 1, opacity: 1, duration: 1.1 },
-              "-=0.9",
-            );
+            .from(".hero-visual", { scale: 0.94, duration: 1.1 }, "-=0.9");
 
           const introFailsafe = gsap.delayedCall(1.8, () => {
             if (intro.progress() < 1) intro.progress(1);
             gsap.set(
               ".site-nav, .hero-context, .hero-title__line, .hero-intro, .hero-actions, .hero-visual",
-              { clearProps: "opacity,transform" },
+              { clearProps: "transform" },
             );
           });
 
@@ -467,7 +456,6 @@ export function PortfolioPage() {
                       <DeferredScene
                         anchorId={`case-${project.id}`}
                         className="robotic-arm-project-scene"
-                        eager
                         fallback={<ProjectVisualPanel type="robot" />}
                         onMount={() => ScrollTrigger.refresh()}
                       >
@@ -486,7 +474,6 @@ export function PortfolioPage() {
                       <DeferredScene
                         anchorId={`case-${project.id}`}
                         className="robosoc-spider-project-scene"
-                        eager
                         fallback={<ProjectVisualPanel type="spider" />}
                         onMount={() => ScrollTrigger.refresh()}
                       >

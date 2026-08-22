@@ -402,9 +402,9 @@ export function FitnessPlatformVisual({ className }: { className?: string }) {
   const embedRef = useRef<HTMLIFrameElement>(null);
   const activationTimer = useRef<number | undefined>(undefined);
   const timeoutTimer = useRef<number | undefined>(undefined);
-  // The hosted page is an enhancement, but request it immediately so the
-  // complete project preview is ready while the visitor reads the first card.
-  const [embedRequested, setEmbedRequested] = useState(true);
+  // Keep the checked-in hero visible first; request the hosted page only when
+  // this project card is likely to be read or intentionally inspected.
+  const [embedRequested, setEmbedRequested] = useState(false);
   const [embedLoaded, setEmbedLoaded] = useState(false);
   const [embedFailed, setEmbedFailed] = useState(false);
 
@@ -418,7 +418,7 @@ export function FitnessPlatformVisual({ className }: { className?: string }) {
     };
     const activateAfterDwell = () => {
       window.clearTimeout(activationTimer.current);
-      activationTimer.current = window.setTimeout(activate, 1200);
+      activationTimer.current = window.setTimeout(activate, 450);
     };
 
     stage.addEventListener("pointerenter", activate);
@@ -431,7 +431,7 @@ export function FitnessPlatformVisual({ className }: { className?: string }) {
           if (entry?.isIntersecting) activateAfterDwell();
           else window.clearTimeout(activationTimer.current);
         },
-        { rootMargin: "160px 0px" },
+        { rootMargin: "420px 0px" },
       );
       observer.observe(stage);
     } else {
@@ -503,7 +503,7 @@ export function FitnessPlatformVisual({ className }: { className?: string }) {
               onLoad={() => setEmbedLoaded(true)}
               src={MOTIV8_HOMEPAGE_URL}
               title="Motiv8 hosted homepage preview"
-              loading="lazy"
+              loading="eager"
               referrerPolicy="no-referrer"
               scrolling="no"
               tabIndex={-1}
