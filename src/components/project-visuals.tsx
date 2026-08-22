@@ -25,6 +25,7 @@ const simulationKeySplines =
 
 const MOTIV8_HOMEPAGE_URL =
   "https://year1-group-project.vercel.app/homepage/homepage.html";
+const MOTIV8_VIEWPORT = { width: 1440, height: 900 } as const;
 
 function joinClassNames(...classNames: Array<string | undefined>) {
   return classNames.filter(Boolean).join(" ");
@@ -401,6 +402,7 @@ export function SpiderHexapodVisual({ className }: { className?: string }) {
 
 export function FitnessPlatformVisual({ className }: { className?: string }) {
   const stageRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
   const embedRef = useRef<HTMLIFrameElement>(null);
   const activationTimer = useRef<number | undefined>(undefined);
   const timeoutTimer = useRef<number | undefined>(undefined);
@@ -409,6 +411,34 @@ export function FitnessPlatformVisual({ className }: { className?: string }) {
   const [embedRequested, setEmbedRequested] = useState(false);
   const [embedLoaded, setEmbedLoaded] = useState(false);
   const [embedFailed, setEmbedFailed] = useState(false);
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    const fitVirtualViewport = () => {
+      if (viewport.clientWidth === 0 || viewport.clientHeight === 0) return;
+
+      const scale = Math.min(
+        viewport.clientWidth / MOTIV8_VIEWPORT.width,
+        viewport.clientHeight / MOTIV8_VIEWPORT.height,
+      );
+      viewport.style.setProperty("--fitness-preview-scale", scale.toString());
+    };
+
+    fitVirtualViewport();
+    const resizeObserver =
+      "ResizeObserver" in window
+        ? new ResizeObserver(fitVirtualViewport)
+        : undefined;
+    resizeObserver?.observe(viewport);
+    window.addEventListener("resize", fitVirtualViewport);
+
+    return () => {
+      resizeObserver?.disconnect();
+      window.removeEventListener("resize", fitVirtualViewport);
+    };
+  }, []);
 
   useEffect(() => {
     const stage = stageRef.current;
@@ -495,22 +525,30 @@ export function FitnessPlatformVisual({ className }: { className?: string }) {
           }
           ref={stageRef}
         >
-          <div className={styles.fitnessPhoto} />
-          <div className={styles.fitnessPhotoWash} />
-          {embedRequested && !embedFailed ? (
-            <iframe
-              className={styles.fitnessEmbed}
-              ref={embedRef}
-              onError={() => setEmbedFailed(true)}
-              onLoad={() => setEmbedLoaded(true)}
-              src={MOTIV8_HOMEPAGE_URL}
-              title="Motiv8 hosted homepage preview"
-              loading="eager"
-              referrerPolicy="no-referrer"
-              scrolling="no"
-              tabIndex={-1}
-            />
-          ) : null}
+          <div
+            className={styles.fitnessViewport}
+            data-virtual-viewport={`${MOTIV8_VIEWPORT.width}x${MOTIV8_VIEWPORT.height}`}
+            ref={viewportRef}
+          >
+            <div className={styles.fitnessPhoto} />
+            <div className={styles.fitnessPhotoWash} />
+            {embedRequested && !embedFailed ? (
+              <iframe
+                className={styles.fitnessEmbed}
+                ref={embedRef}
+                onError={() => setEmbedFailed(true)}
+                onLoad={() => setEmbedLoaded(true)}
+                src={MOTIV8_HOMEPAGE_URL}
+                title="Motiv8 hosted homepage preview"
+                loading="eager"
+                referrerPolicy="no-referrer"
+                scrolling="no"
+                tabIndex={-1}
+                width={MOTIV8_VIEWPORT.width}
+                height={MOTIV8_VIEWPORT.height}
+              />
+            ) : null}
+          </div>
           <div className={styles.fitnessBrandLockup}>
             <span className={styles.fitnessLogo} />
             <span>TEAM PROJECT / 2025</span>

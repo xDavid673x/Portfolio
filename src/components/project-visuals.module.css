@@ -1490,6 +1490,7 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
+  background: #080b0d;
 }
 
 .fitnessStage::before {
@@ -1511,32 +1512,43 @@
   inset: 0;
 }
 
+.fitnessViewport {
+  --fitness-preview-scale: 0.5;
+  position: absolute;
+  inset: clamp(0.7rem, 2.4vw, 1.8rem);
+  overflow: hidden;
+  border: 1px solid rgba(230, 237, 240, 0.18);
+  background: #dfeaff;
+  box-shadow: 0 1.4rem 3.5rem rgba(0, 0, 0, 0.28);
+}
+
 .fitnessPhoto {
   background:
-    linear-gradient(rgba(12, 20, 24, 0.12), rgba(12, 20, 24, 0.12)),
-    var(--fitness-photo-url) center / cover no-repeat,
-    #293840;
-  filter: saturate(0.92) contrast(1.03) brightness(0.96);
-  transform: scale(1.02);
-  animation: imageBreathe 9s ease-in-out infinite alternate;
+    var(--fitness-photo-url) center / contain no-repeat,
+    #dfeaff;
+  filter: saturate(0.96) contrast(1.02);
 }
 
 .fitnessPhotoWash {
   background:
-    linear-gradient(90deg, rgba(9, 16, 20, 0.1), transparent 64%, rgba(9, 16, 20, 0.26)),
-    linear-gradient(0deg, rgba(9, 16, 20, 0.14), transparent 58%);
+    linear-gradient(90deg, rgba(9, 16, 20, 0.035), transparent 64%, rgba(9, 16, 20, 0.08)),
+    linear-gradient(0deg, rgba(9, 16, 20, 0.04), transparent 58%);
 }
 
 .fitnessEmbed {
   position: absolute;
-  inset: 0;
+  top: 50%;
+  left: 50%;
   z-index: 2;
-  width: 100%;
-  height: 100%;
+  width: 1440px;
+  max-width: none;
+  height: 900px;
   border: 0;
   background: #eef5ff;
   opacity: 0;
   pointer-events: none;
+  transform: translate(-50%, -50%) scale(var(--fitness-preview-scale));
+  transform-origin: center;
   transition: opacity 420ms ease;
 }
 
@@ -1545,8 +1557,7 @@
 }
 
 /* The supplied Motiv8 capture already contains its own navigation and hero copy.
-   Keep the existing stage structure and breathing motion while letting the
-   source capture carry the visual story without duplicate overlay copy. */
+   Let the fixed desktop viewport carry the visual story without duplicate copy. */
 .fitnessBrandLockup,
 .fitnessHeroCopy,
 .fitnessStageFooter {
@@ -1701,11 +1712,6 @@
 @keyframes footfallPing {
   0%, 100% { opacity: 0.18; transform: scale(0.72); }
   50% { opacity: 0.92; transform: scale(1.05); }
-}
-
-@keyframes imageBreathe {
-  from { transform: scale(1.02); }
-  to { transform: scale(1.08); }
 }
 
 @container (max-width: 530px) {

@@ -1,5 +1,5 @@
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   FitnessPlatformVisual,
@@ -7,7 +7,10 @@ import {
   ProjectVisual,
 } from "./project-visuals";
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
 
 describe("FitnessPlatformVisual", () => {
   it("keeps the local hero image visible before the hosted page is requested", () => {
@@ -25,6 +28,25 @@ describe("FitnessPlatformVisual", () => {
     stage?.dispatchEvent(new Event("pointerenter"));
 
     expect(await screen.findByTitle("Motiv8 hosted homepage preview")).toBeInTheDocument();
+  });
+
+  it("keeps the hosted hero at a fixed desktop viewport while scaling its frame", async () => {
+    vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(720);
+    vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockReturnValue(450);
+
+    render(<FitnessPlatformVisual />);
+
+    const viewport = document.querySelector<HTMLElement>(
+      "[data-virtual-viewport='1440x900']",
+    );
+    expect(viewport).toHaveStyle({ "--fitness-preview-scale": "0.5" });
+
+    const stage = document.querySelector("[data-embed-state]");
+    stage?.dispatchEvent(new Event("pointerenter"));
+
+    const iframe = await screen.findByTitle("Motiv8 hosted homepage preview");
+    expect(iframe).toHaveAttribute("width", "1440");
+    expect(iframe).toHaveAttribute("height", "900");
   });
 
   it("keeps the local fallback when the preview fails", async () => {
