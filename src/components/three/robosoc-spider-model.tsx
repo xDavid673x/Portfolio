@@ -314,6 +314,4 @@ export function RobosocSpiderModel({
   );
 }
 
-useGLTF.preload(ROBOSOC_SPIDER_MODEL_URL);
-
 export default RobosocSpiderModel;

@@ -8,6 +8,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import { ProjectVisual as ProjectVisualPanel } from "@/components/project-visuals";
+import { DeferredScene } from "@/components/deferred-scene";
 import { HeroPortrait } from "@/components/hero-portrait";
 import { projects } from "@/data/projects";
 import { assetPath } from "@/lib/asset-path";
@@ -425,10 +426,17 @@ export function PortfolioPage() {
                 <div className="case-card__visual group overflow-hidden">
                   {project.id === "robotic-arm" ? (
                     <div className="robotic-arm-scene-frame">
-                      <RoboticArmScene
+                      <DeferredScene
+                        anchorId={`case-${project.id}`}
                         className="robotic-arm-project-scene"
-                        label="The articulated ZERO robotic arm performing a pick-and-place sorting task as the project chapter scrolls"
-                      />
+                        fallback={<ProjectVisualPanel type="robot" />}
+                        onMount={() => ScrollTrigger.refresh()}
+                      >
+                        <RoboticArmScene
+                          className="robotic-arm-project-scene"
+                          label="The articulated ZERO robotic arm performing a pick-and-place sorting task as the project chapter scrolls"
+                        />
+                      </DeferredScene>
                       <div className="robotic-arm-scene-note" aria-hidden="true">
                         <span>Pick → transfer → place</span>
                         <span>Continuous workcell cycle</span>
@@ -436,10 +444,17 @@ export function PortfolioPage() {
                     </div>
                   ) : project.id === "robosoc-spider" ? (
                     <div className="robosoc-spider-scene-frame">
-                      <RobosocSpiderScene
+                      <DeferredScene
+                        anchorId={`case-${project.id}`}
                         className="robosoc-spider-project-scene"
-                        label="The articulated RoboSoc hexapod walking forward with a continuous alternating-tripod gait"
-                      />
+                        fallback={<ProjectVisualPanel type="spider" />}
+                        onMount={() => ScrollTrigger.refresh()}
+                      >
+                        <RobosocSpiderScene
+                          className="robosoc-spider-project-scene"
+                          label="The articulated RoboSoc hexapod walking forward with a continuous alternating-tripod gait"
+                        />
+                      </DeferredScene>
                       <div className="robosoc-spider-scene-note" aria-hidden="true">
                         <span>Tripod A / Tripod B</span>
                         <span>Continuous forward gait</span>
