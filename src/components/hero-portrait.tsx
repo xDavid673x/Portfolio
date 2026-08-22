@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { assetPath } from "@/lib/asset-path";
 
@@ -39,6 +39,12 @@ export function HeroPortrait({
 }: HeroPortraitProps) {
   const [isFallback, setIsFallback] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const imageRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const image = imageRef.current;
+    if (image?.complete && image.naturalWidth > 0) setIsLoaded(true);
+  }, [isFallback]);
 
   const handleError = () => {
     if (!isFallback) {
@@ -65,6 +71,7 @@ export function HeroPortrait({
         decoding="async"
         fetchPriority="high"
         height={1402}
+        ref={imageRef}
         loading="eager"
         onError={handleError}
         onLoad={() => setIsLoaded(true)}
@@ -75,4 +82,3 @@ export function HeroPortrait({
     </picture>
   );
 }
-
