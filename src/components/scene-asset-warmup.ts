@@ -21,11 +21,17 @@ export function getSceneWarmupDelay(connection?: ConnectionHints) {
     : 1800;
 }
 
-function scheduleIdle(callback: () => void, timeout: number) {
+function scheduleIdle(callback: () => void, timeout: number, notBefore = 0) {
   const idleWindow = window as IdleWindow;
   let called = false;
+  let idleReady = notBefore === 0;
+  let idleRequested = false;
   let idleHandle: number | undefined;
-  const timeoutHandle = window.setTimeout(run, timeout);
+  const earliestHandle = window.setTimeout(() => {
+    idleReady = true;
+    if (idleRequested) run();
+  }, notBefore);
+  const timeoutHandle = window.setTimeout(run, notBefore + timeout);
 
   function run() {
     if (called) return;
@@ -34,11 +40,20 @@ function scheduleIdle(callback: () => void, timeout: number) {
       idleWindow.cancelIdleCallback?.(idleHandle);
     }
     window.clearTimeout(timeoutHandle);
+    window.clearTimeout(earliestHandle);
     callback();
   }
 
   if (idleWindow.requestIdleCallback) {
-    idleHandle = idleWindow.requestIdleCallback(run, { timeout });
+    idleHandle = idleWindow.requestIdleCallback(
+      () => {
+        idleRequested = true;
+        if (idleReady) run();
+      },
+      { timeout: notBefore + timeout },
+    );
+  } else {
+    idleRequested = true;
   }
 
   return () => {
@@ -47,6 +62,7 @@ function scheduleIdle(callback: () => void, timeout: number) {
       idleWindow.cancelIdleCallback?.(idleHandle);
     }
     window.clearTimeout(timeoutHandle);
+    window.clearTimeout(earliestHandle);
   };
 }
 
@@ -94,13 +110,17 @@ export function useSceneAssetWarmup() {
       if (warmupScheduled) return;
       warmupScheduled = true;
       cancelIdle?.();
-      cancelIdle = scheduleIdle(warmModels, shouldUseLongWarmup() ? 4200 : 1800);
+      const longWarmup = shouldUseLongWarmup();
+      const delay = longWarmup ? 4200 : 1800;
+      cancelIdle = scheduleIdle(warmModels, delay, longWarmup ? 1200 : 850);
     };
 
     const warmupOnIntent = () => {
       if (warmupScheduled) return;
       warmupScheduled = true;
-      cancelIdle = scheduleIdle(warmModels, shouldUseLongWarmup() ? 900 : 300);
+      const longWarmup = shouldUseLongWarmup();
+      const delay = longWarmup ? 900 : 300;
+      cancelIdle = scheduleIdle(warmModels, delay, 180);
     };
 
     const intentTargets = [
