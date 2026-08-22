@@ -399,6 +399,7 @@ export function SpiderHexapodVisual({ className }: { className?: string }) {
 
 export function FitnessPlatformVisual({ className }: { className?: string }) {
   const stageRef = useRef<HTMLDivElement>(null);
+  const embedRef = useRef<HTMLIFrameElement>(null);
   const activationTimer = useRef<number | undefined>(undefined);
   const timeoutTimer = useRef<number | undefined>(undefined);
   const [embedRequested, setEmbedRequested] = useState(false);
@@ -454,6 +455,21 @@ export function FitnessPlatformVisual({ className }: { className?: string }) {
     return () => window.clearTimeout(timeoutTimer.current);
   }, [embedLoaded, embedRequested]);
 
+  useEffect(() => {
+    const embed = embedRef.current;
+    if (!embed || !embedRequested) return;
+
+    const markLoaded = () => setEmbedLoaded(true);
+    const markFailed = () => setEmbedFailed(true);
+    embed.addEventListener("load", markLoaded);
+    embed.addEventListener("error", markFailed);
+
+    return () => {
+      embed.removeEventListener("load", markLoaded);
+      embed.removeEventListener("error", markFailed);
+    };
+  }, [embedRequested]);
+
   return (
     <figure
       className={joinClassNames(styles.visual, styles.fitnessVisual, className)}
@@ -480,6 +496,7 @@ export function FitnessPlatformVisual({ className }: { className?: string }) {
           {embedRequested && !embedFailed ? (
             <iframe
               className={styles.fitnessEmbed}
+              ref={embedRef}
               onError={() => setEmbedFailed(true)}
               onLoad={() => setEmbedLoaded(true)}
               src={MOTIV8_HOMEPAGE_URL}
