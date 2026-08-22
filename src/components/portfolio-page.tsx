@@ -2,13 +2,13 @@
 
 import { useGSAP } from "@gsap/react";
 import dynamic from "next/dynamic";
-import Image from "next/image";
 import type { CSSProperties } from "react";
 import { useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import { ProjectVisual as ProjectVisualPanel } from "@/components/project-visuals";
+import { HeroPortrait } from "@/components/hero-portrait";
 import { projects } from "@/data/projects";
 import { assetPath } from "@/lib/asset-path";
 
@@ -279,14 +279,10 @@ export function PortfolioPage() {
 
             <div className="hero-visual">
               <div className="hero-portrait-glow" aria-hidden="true" />
-              <Image
+              <HeroPortrait
                 alt="Stylized portrait of Ka Chong"
                 className="hero-portrait"
-                height={1402}
-                priority
                 sizes="(max-width: 620px) 96vw, (max-width: 899px) 74vw, 52vw"
-                src={assetPath("/images/avatar/david-hero-portrait-v1.png")}
-                width={1122}
               />
             </div>
 
