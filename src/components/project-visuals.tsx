@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+
 import styles from "./project-visuals.module.css";
 
 export type ProjectVisualType = "robot" | "spider" | "fitness";
@@ -394,6 +398,62 @@ export function SpiderHexapodVisual({ className }: { className?: string }) {
 }
 
 export function FitnessPlatformVisual({ className }: { className?: string }) {
+  const stageRef = useRef<HTMLDivElement>(null);
+  const activationTimer = useRef<number | undefined>(undefined);
+  const timeoutTimer = useRef<number | undefined>(undefined);
+  const [embedRequested, setEmbedRequested] = useState(false);
+  const [embedLoaded, setEmbedLoaded] = useState(false);
+  const [embedFailed, setEmbedFailed] = useState(false);
+
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    const activate = () => {
+      window.clearTimeout(activationTimer.current);
+      setEmbedRequested(true);
+    };
+    const activateAfterDwell = () => {
+      window.clearTimeout(activationTimer.current);
+      activationTimer.current = window.setTimeout(activate, 1200);
+    };
+
+    stage.addEventListener("pointerenter", activate);
+    stage.addEventListener("focusin", activate);
+
+    let observer: IntersectionObserver | undefined;
+    if ("IntersectionObserver" in window) {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry?.isIntersecting) activateAfterDwell();
+          else window.clearTimeout(activationTimer.current);
+        },
+        { rootMargin: "160px 0px" },
+      );
+      observer.observe(stage);
+    } else {
+      activateAfterDwell();
+    }
+
+    return () => {
+      observer?.disconnect();
+      window.clearTimeout(activationTimer.current);
+      window.clearTimeout(timeoutTimer.current);
+      stage.removeEventListener("pointerenter", activate);
+      stage.removeEventListener("focusin", activate);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!embedRequested || embedLoaded) return;
+
+    timeoutTimer.current = window.setTimeout(() => {
+      setEmbedFailed(true);
+    }, 5000);
+
+    return () => window.clearTimeout(timeoutTimer.current);
+  }, [embedLoaded, embedRequested]);
+
   return (
     <figure
       className={joinClassNames(styles.visual, styles.fitnessVisual, className)}
@@ -408,18 +468,28 @@ export function FitnessPlatformVisual({ className }: { className?: string }) {
       </div>
 
       <div className={styles.fitnessLayout} aria-hidden="true">
-        <div className={styles.fitnessStage}>
+        <div
+          className={styles.fitnessStage}
+          data-embed-state={
+            embedFailed ? "fallback" : embedLoaded ? "ready" : "local"
+          }
+          ref={stageRef}
+        >
           <div className={styles.fitnessPhoto} />
           <div className={styles.fitnessPhotoWash} />
-          <iframe
-            className={styles.fitnessEmbed}
-            src={MOTIV8_HOMEPAGE_URL}
-            title="Motiv8 hosted homepage preview"
-            loading="lazy"
-            referrerPolicy="no-referrer"
-            scrolling="no"
-            tabIndex={-1}
-          />
+          {embedRequested && !embedFailed ? (
+            <iframe
+              className={styles.fitnessEmbed}
+              onError={() => setEmbedFailed(true)}
+              onLoad={() => setEmbedLoaded(true)}
+              src={MOTIV8_HOMEPAGE_URL}
+              title="Motiv8 hosted homepage preview"
+              loading="lazy"
+              referrerPolicy="no-referrer"
+              scrolling="no"
+              tabIndex={-1}
+            />
+          ) : null}
           <div className={styles.fitnessBrandLockup}>
             <span className={styles.fitnessLogo} />
             <span>TEAM PROJECT / 2025</span>

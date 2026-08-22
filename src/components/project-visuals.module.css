@@ -1254,7 +1254,13 @@
   height: 100%;
   border: 0;
   background: #eef5ff;
+  opacity: 0;
   pointer-events: none;
+  transition: opacity 420ms ease;
+}
+
+.fitnessStage[data-embed-state="ready"] .fitnessEmbed {
+  opacity: 1;
 }
 
 /* The supplied Motiv8 capture already contains its own navigation and hero copy.
