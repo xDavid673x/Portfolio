@@ -24,6 +24,7 @@ import {
 
 export type RobosocSpiderSceneProps = {
   className?: string;
+  fallback?: ReactNode;
   label?: string;
   style?: CSSProperties;
 };
@@ -311,6 +312,7 @@ export function RobosocSpiderSceneFallback({
 
 export function RobosocSpiderScene({
   className,
+  fallback: fallbackContent,
   label = "An interactive 3D RoboSoc hexapod walking forward in alternating tripod gait",
   style,
 }: RobosocSpiderSceneProps) {
@@ -362,11 +364,13 @@ export function RobosocSpiderScene({
   }, [webGLReady]);
 
   const fallback = (
-    <RobosocSpiderSceneFallback
-      className={className}
-      label={label}
-      style={style}
-    />
+    fallbackContent ?? (
+      <RobosocSpiderSceneFallback
+        className={className}
+        label={label}
+        style={style}
+      />
+    )
   );
 
   if (!webGLReady) return fallback;

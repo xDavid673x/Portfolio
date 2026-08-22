@@ -35,6 +35,7 @@ const PICK_AND_PLACE_CYCLE_SECONDS = 10;
 
 export type HeroSceneProps = {
   className?: string;
+  fallback?: ReactNode;
   label?: string;
   style?: CSSProperties;
 };
@@ -592,6 +593,7 @@ export function HeroSceneFallback({
 
 export function HeroScene({
   className,
+  fallback: fallbackContent,
   label = "An interactive 3D model of the ZERO robotic arm moving a workpiece from the input station to the output station",
   style,
 }: HeroSceneProps) {
@@ -644,7 +646,9 @@ export function HeroScene({
   }, [webGLReady]);
 
   const fallback = (
-    <HeroSceneFallback className={className} label={label} style={style} />
+    fallbackContent ?? (
+      <HeroSceneFallback className={className} label={label} style={style} />
+    )
   );
 
   if (!webGLReady) return fallback;

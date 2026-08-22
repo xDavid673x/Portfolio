@@ -22,11 +22,7 @@ const RoboticArmScene = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="scene-loading" aria-hidden="true">
-        <span />
-        <span />
-        <span />
-      </div>
+      <ProjectVisualPanel type="robot" />
     ),
   },
 );
@@ -39,11 +35,7 @@ const RobosocSpiderScene = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="scene-loading" aria-hidden="true">
-        <span />
-        <span />
-        <span />
-      </div>
+      <ProjectVisualPanel type="spider" />
     ),
   },
 );
@@ -381,48 +373,7 @@ export function PortfolioPage() {
         </div>
       </div>
 
-      <section className="work-overview" id="work">
-        <header className="chapter-heading section-reveal">
-          <p>Selected work</p>
-          <h2>
-            From shipped software to systems that <em>learn.</em>
-          </h2>
-        </header>
-
-        <div className="project-bento grid-flow-dense section-reveal">
-          {projects.map((project, index) => (
-            <a
-              className={`bento-card group bento-card--${index === 0 ? "lead" : "side"} bento-card--${project.tone}`}
-              href={`#case-${project.id}`}
-              key={project.id}
-            >
-              <div
-                className={`bento-card__visual${
-                  index === 0 ? "" : " group-hover:scale-105 transition-transform duration-700 ease-out"
-                }`}
-              >
-                <ProjectVisualPanel
-                  presentation="project-card"
-                  type={project.visual}
-                />
-              </div>
-              <div className={`bento-card__copy${index === 0 ? " bento-card__copy--lead" : ""}`}>
-                <span className="bento-card__discipline">
-                  {index === 0 ? "Reinforcement learning / robotics" : project.context}
-                </span>
-                <h3>{project.shortTitle}</h3>
-                <p>{project.summary}</p>
-                <span className="text-link">
-                  Read the build notes
-                  <ArrowIcon />
-                </span>
-              </div>
-            </a>
-          ))}
-        </div>
-      </section>
-
-      <section className="case-studies" aria-labelledby="case-study-title">
+      <section className="case-studies" id="work" aria-labelledby="case-study-title">
         <div className="case-layout">
           <aside className="case-intro">
             <p>Inside the work</p>
@@ -464,6 +415,7 @@ export function PortfolioPage() {
                       >
                         <RoboticArmScene
                           className="robotic-arm-project-scene"
+                          fallback={<ProjectVisualPanel type="robot" />}
                           label="The articulated ZERO robotic arm performing a pick-and-place sorting task as the project chapter scrolls"
                         />
                       </DeferredScene>
@@ -482,6 +434,7 @@ export function PortfolioPage() {
                       >
                         <RobosocSpiderScene
                           className="robosoc-spider-project-scene"
+                          fallback={<ProjectVisualPanel type="spider" />}
                           label="The articulated RoboSoc hexapod walking forward with a continuous alternating-tripod gait"
                         />
                       </DeferredScene>

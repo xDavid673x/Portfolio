@@ -125,7 +125,7 @@ export function useSceneAssetWarmup() {
 
     const intentTargets = [
       ...document.querySelectorAll<HTMLAnchorElement>('a[href="#work"]'),
-      ...document.querySelectorAll<HTMLElement>(".bento-card"),
+      ...document.querySelectorAll<HTMLElement>(".case-card"),
     ];
     intentTargets.forEach((target) => {
       target.addEventListener("pointerenter", warmupOnIntent, { passive: true });
