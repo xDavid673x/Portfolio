@@ -21,6 +21,24 @@ describe("FitnessPlatformVisual", () => {
     expect(document.querySelector("[data-embed-state='local']")).toBeInTheDocument();
   });
 
+  it("exposes the live Motiv8 project as a click target on the case-study visual", () => {
+    render(
+      <FitnessPlatformVisual
+        linkHref="https://year1-group-project.vercel.app/homepage/homepage.html"
+      />,
+    );
+
+    const link = screen.getByRole("link", {
+      name: "Open the Motiv8 live project",
+    });
+    expect(link).toHaveAttribute(
+      "href",
+      "https://year1-group-project.vercel.app/homepage/homepage.html",
+    );
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("data-live-project-link", "motiv8");
+  });
+
   it("requests the hosted preview after the card enters the viewport", async () => {
     render(<FitnessPlatformVisual />);
 

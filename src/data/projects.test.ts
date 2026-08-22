@@ -32,6 +32,9 @@ describe("project portfolio data", () => {
       href: "https://github.com/xDavid673x/Year1_GroupProject",
       label: "View project source",
     });
+    expect(projectById["fitness-platform"].liveUrl).toBe(
+      "https://year1-group-project.vercel.app/homepage/homepage.html",
+    );
     expect(projectById["robotic-arm"].source).toBeUndefined();
     expect(projectById["robosoc-spider"].source).toEqual({
       href: "https://github.com/xDavid673x/RoboSoc_Spider",

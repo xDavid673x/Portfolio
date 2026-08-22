@@ -1556,6 +1556,45 @@
   opacity: 1;
 }
 
+.fitnessLiveLink {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: block;
+  cursor: pointer;
+}
+
+.fitnessLiveLink span {
+  position: absolute;
+  right: clamp(0.55rem, 1.2vw, 0.95rem);
+  bottom: clamp(0.55rem, 1.2vw, 0.95rem);
+  padding: 0.48rem 0.62rem;
+  border: 1px solid rgba(8, 11, 13, 0.2);
+  border-radius: 999px;
+  background: rgba(244, 247, 255, 0.86);
+  color: #153f81;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: clamp(0.38rem, 0.62vw, 0.52rem);
+  letter-spacing: 0.08em;
+  opacity: 0.78;
+  transition: background 220ms ease, color 220ms ease, opacity 220ms ease,
+    transform 220ms ease;
+}
+
+.fitnessLiveLink:hover span,
+.fitnessLiveLink:focus-visible span {
+  background: #153f81;
+  color: #f4f7ff;
+  opacity: 1;
+  transform: translateY(-0.18rem);
+}
+
+.fitnessLiveLink:focus-visible {
+  border-radius: 0.4rem;
+  outline: 2px solid #78a9ff;
+  outline-offset: -0.35rem;
+}
+
 /* The supplied Motiv8 capture already contains its own navigation and hero copy.
    Let the fixed desktop viewport carry the visual story without duplicate copy. */
 .fitnessBrandLockup,

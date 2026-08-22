@@ -19,6 +19,7 @@ export type Project = {
     href: string;
     label: string;
   };
+  liveUrl?: string;
 };
 
 export const projects: Project[] = [
@@ -92,6 +93,8 @@ export const projects: Project[] = [
       href: "https://github.com/xDavid673x/Year1_GroupProject",
       label: "View project source",
     },
+    liveUrl:
+      "https://year1-group-project.vercel.app/homepage/homepage.html",
   },
 ];
 

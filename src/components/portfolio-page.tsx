@@ -492,7 +492,10 @@ export function PortfolioPage() {
                     </div>
                   ) : (
                     <div className="group-hover:scale-105 transition-transform duration-700 ease-out">
-                      <ProjectVisualPanel type={project.visual} />
+                      <ProjectVisualPanel
+                        linkHref={project.liveUrl}
+                        type={project.visual}
+                      />
                     </div>
                   )}
                 </div>

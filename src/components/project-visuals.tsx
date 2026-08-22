@@ -11,6 +11,7 @@ type ProjectVisualProps = {
   type: ProjectVisualType;
   className?: string;
   presentation?: "case-study" | "project-card";
+  linkHref?: string;
 };
 
 const gaitBands = [
@@ -400,7 +401,13 @@ export function SpiderHexapodVisual({ className }: { className?: string }) {
   );
 }
 
-export function FitnessPlatformVisual({ className }: { className?: string }) {
+export function FitnessPlatformVisual({
+  className,
+  linkHref,
+}: {
+  className?: string;
+  linkHref?: string;
+}) {
   const stageRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const embedRef = useRef<HTMLIFrameElement>(null);
@@ -507,8 +514,12 @@ export function FitnessPlatformVisual({ className }: { className?: string }) {
   return (
     <figure
       className={joinClassNames(styles.visual, styles.fitnessVisual, className)}
-      role="img"
-      aria-label="Motiv8 homepage hero visual showing the shipped fitness platform, its brand mark, and connected workout, social, and coaching features."
+      role={linkHref ? undefined : "img"}
+      aria-label={
+        linkHref
+          ? undefined
+          : "Motiv8 homepage hero visual showing the shipped fitness platform, its brand mark, and connected workout, social, and coaching features."
+      }
     >
       <div className={styles.technicalHeader} aria-hidden="true">
         <span>MOTIV8 / FULL-STACK PLATFORM</span>
@@ -517,7 +528,7 @@ export function FitnessPlatformVisual({ className }: { className?: string }) {
         </span>
       </div>
 
-      <div className={styles.fitnessLayout} aria-hidden="true">
+      <div className={styles.fitnessLayout} aria-hidden={linkHref ? undefined : true}>
         <div
           className={styles.fitnessStage}
           data-embed-state={
@@ -565,6 +576,18 @@ export function FitnessPlatformVisual({ className }: { className?: string }) {
         </div>
 
       </div>
+      {linkHref ? (
+        <a
+          aria-label="Open the Motiv8 live project"
+          className={styles.fitnessLiveLink}
+          data-live-project-link="motiv8"
+          href={linkHref}
+          rel="noreferrer"
+          target="_blank"
+        >
+          <span>OPEN LIVE PROJECT ↗</span>
+        </a>
+      ) : null}
     </figure>
   );
 }
@@ -677,6 +700,7 @@ export function ProjectVisual({
   type,
   className,
   presentation = "case-study",
+  linkHref,
 }: ProjectVisualProps) {
   if (type === "robot") {
     return <RoboticArmVisual className={className} />;
@@ -690,5 +714,5 @@ export function ProjectVisual({
     return <FitnessTrainingVisual className={className} />;
   }
 
-  return <FitnessPlatformVisual className={className} />;
+  return <FitnessPlatformVisual className={className} linkHref={linkHref} />;
 }
