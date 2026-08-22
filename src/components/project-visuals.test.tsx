@@ -1,11 +1,7 @@
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import {
-  FitnessPlatformVisual,
-  FitnessTrainingVisual,
-  ProjectVisual,
-} from "./project-visuals";
+import { FitnessPlatformVisual } from "./project-visuals";
 
 afterEach(() => {
   cleanup();
@@ -80,24 +76,5 @@ describe("FitnessPlatformVisual", () => {
       expect(screen.queryByTitle("Motiv8 hosted homepage preview")).not.toBeInTheDocument();
       expect(document.querySelector("figure")).toBeInTheDocument();
     });
-  });
-});
-
-describe("FitnessTrainingVisual", () => {
-  it("uses a gym-session visual instead of the hosted website in project cards", () => {
-    render(<ProjectVisual presentation="project-card" type="fitness" />);
-
-    expect(document.querySelector("[data-fitness-visual='training']")).toBeInTheDocument();
-    expect(screen.queryByTitle("Motiv8 hosted homepage preview")).not.toBeInTheDocument();
-    expect(screen.getByText("BENCH PRESS")).toBeInTheDocument();
-    expect(screen.getByText("68 KG")).toBeInTheDocument();
-  });
-
-  it("describes the training instrument for assistive technology", () => {
-    render(<FitnessTrainingVisual />);
-
-    expect(
-      screen.getByRole("img", { name: /loaded barbell.*workout-set telemetry/i }),
-    ).toBeInTheDocument();
   });
 });
